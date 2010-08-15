@@ -30,16 +30,16 @@ public class IrcViewer extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.viewer);
-        // TexxtView‚Ì€”õ
+        // TexxtViewã®æº–å‚™
         recieve = (TextView) this.findViewById(R.id.recieve);
         recieve.setText("irc viewer start...\n");
-        // óM‚µ‚½ƒeƒLƒXƒg‚ğTextView‚Éo—Í‚·‚éhandler
+        // å—ä¿¡ã—ãŸãƒ†ã‚­ã‚¹ãƒˆã‚’TextViewã«å‡ºåŠ›ã™ã‚‹handler
         this.handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case 0:
-                    	// o—Í
+                    	// å‡ºåŠ›
                         recieve.setText(msg.obj.toString() + "\n" + recieve.getText()
                                 + "\n");
                 }
@@ -47,7 +47,7 @@ public class IrcViewer extends Activity {
             }
         };
 
-        // ’ÊM—pthread
+        // é€šä¿¡ç”¨thread
         (new Thread() {
             public void run() {
                 try {
@@ -61,20 +61,20 @@ public class IrcViewer extends Activity {
 
     private void connect(String host, Integer port) {
         try {
-        	// ’ÊMŠJn
+        	// é€šä¿¡é–‹å§‹
             Socket irc = new Socket(host, port);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
                     irc.getOutputStream()));
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    irc.getInputStream(), "ISO-2022-JP"));// •¶šƒR[ƒh‚Í‚Æ‚è‚ ‚¦‚¸Œˆ‚ß‘Å‚¿
-            // ƒƒOƒCƒ“
+                    irc.getInputStream(), "ISO-2022-JP"));// ã¨ã‚Šã‚ãˆãšæ–‡å­—ã‚³ãƒ¼ãƒ‰æ±ºã‚æ‰“ã¡
+            // ãƒ­ã‚°ã‚¤ãƒ³
             bw.write("NICK " + NICK + "\n");
             bw.write("USER " + LOGIN + " test by yusukezzz\n");
             bw.flush();
-            // ƒ`ƒƒƒ“ƒlƒ‹‚É“ü‚é
+            // ãƒãƒ£ãƒ³ãƒãƒ«ã«å‚åŠ 
             bw.write("JOIN " + CHANNEL + "\n");
             bw.flush();
-            // 1s‚¸‚ÂóM
+            // 1è¡Œãšã¤å‡¦ç†
             String current = null;
             while ((current = br.readLine()) != null) {
             	// PING PONG
@@ -86,7 +86,7 @@ public class IrcViewer extends Activity {
                     bw.write("PRIVMSG " + CHANNEL + " PONG!\n");
                     bw.flush();
                 }
-                // ‚»‚êˆÈŠO‚ÌƒeƒLƒXƒg‚ğhandler‚Ö
+                // ãã‚Œä»¥å¤–ã®ãƒ†ã‚­ã‚¹ãƒˆã‚’handlerã¸
                 Message msg;
                 msg = new Message();
                 msg.obj = current;
