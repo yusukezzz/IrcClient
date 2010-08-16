@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 public class IrcViewer extends Activity {
     private String   HOST    = "irc.friend-chat.jp";
-    private Integer  PORT    = 6667;
+    private Integer  PORT    = 6660; // なんか6667は混んでるらしいので
     private String   NICK    = "androzzz";
     private String   LOGIN   = "androzzz";
     private String   CHANNEL = "#yusukezzz_test";
@@ -32,7 +32,7 @@ public class IrcViewer extends Activity {
         setContentView(R.layout.viewer);
         // TexxtViewの準備
         recieve = (TextView) this.findViewById(R.id.recieve);
-        recieve.setText("irc viewer start...\n");
+        recieve.setText("");
         // 受信したテキストをTextViewに出力するhandler
         this.handler = new Handler() {
             @Override
@@ -68,6 +68,7 @@ public class IrcViewer extends Activity {
     private void connect(String host, Integer port) {
         try {
             // 通信開始
+        	this.showMessage(host + " connecting...");
             Socket irc = new Socket(host, port);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
                     irc.getOutputStream()));
@@ -92,8 +93,21 @@ public class IrcViewer extends Activity {
                     bw.write("PRIVMSG " + CHANNEL + " PONG!\n");
                     bw.flush();
                 }
-                // それ以外のテキストをhandlerへ
-                this.showMessage(current);
+                // JOIN の表示
+                Pattern joinRegex = Pattern.compile("JOIN :" + CHANNEL,
+                		Pattern.CASE_INSENSITIVE);
+                Matcher join = joinRegex.matcher(current);
+                if (join.find()) {
+                	this.showMessage(CHANNEL + " joined.");
+                }
+                // PRIVMSG のテキストをhandlerへ
+                Pattern pmsgRegex = Pattern.compile(
+                		":([a-zA-Z0-9_]+?)!.+? PRIVMSG #[a-zA-Z0-9_]+? :(.+)");
+                Matcher pmsg = pmsgRegex.matcher(current);
+                if (pmsg.find()) {
+                	String text = "<" + pmsg.group(1) + "> " + pmsg.group(2);
+                	this.showMessage(text);
+                }
             }
         } catch (IOException e) {
             this.showMessage("[Err]" + e.getMessage());
