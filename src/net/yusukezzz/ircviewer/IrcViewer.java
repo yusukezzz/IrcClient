@@ -1,5 +1,6 @@
 package net.yusukezzz.ircviewer;
 
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import android.app.Activity;
@@ -52,10 +53,12 @@ public class IrcViewer extends Activity {
                 switch (msg.what) {
                     case 0:
                         // 現在時刻の取得
+                        DecimalFormat df = new DecimalFormat();
+                        df.applyLocalizedPattern("00");
                         Calendar now = Calendar.getInstance();
                         int h = now.get(Calendar.HOUR_OF_DAY);
                         int m = now.get(Calendar.MINUTE);
-                        String time = h + ":" + m;
+                        String time = df.format(h) + ":" + df.format(m);
                         // 出力
                         Boolean toBtm = false;
                         Integer pos = recieve.getBottom() - scroll.getScrollY();
