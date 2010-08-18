@@ -1,8 +1,7 @@
-package net.yusukezzz.ircviewer;
+package net.yusukezzz.ircclient;
 
 import java.text.DecimalFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,9 +14,9 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-public class IrcViewer extends Activity {
+public class IrcClient extends Activity {
     private String     HOST    = "irc.friend-chat.jp";
-    private Integer    PORT    = 6660;                // なんか6667は混んでるらしいので
+    private Integer    PORT    = 6660;                    // なんか6667は混んでるらしいので
     private String     NICK    = "androzzz";
     private String     LOGIN   = "androzzz";
     private String     CHANNEL = "#yusukezzz_test";
@@ -27,23 +26,23 @@ public class IrcViewer extends Activity {
     private EditText   sendtxt;
     private Button     postbtn;
     private Handler    handler;
-    private Irc        irc;
+    private IrcHost    ircHost;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.viewer);
+        setContentView(R.layout.main);
         // viewの部品準備
         scroll = (ScrollView) this.findViewById(R.id.ScrollView01);
-        recieve = (TextView) this.findViewById(R.id.recieve);
+        recieve = (TextView) this.findViewById(R.id.TextView01);
         postbtn = (Button) this.findViewById(R.id.Button01);
         sendtxt = (EditText) this.findViewById(R.id.EditText01);
         // 送信ボタンにイベントをセット
         postbtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                IrcViewer.this.postText(CHANNEL, sendtxt.getText().toString());
+                IrcClient.this.postText(CHANNEL, sendtxt.getText().toString());
             }
         });
         // 受信したテキストをTextViewに出力するhandler
@@ -59,14 +58,16 @@ public class IrcViewer extends Activity {
                         int h = now.get(Calendar.HOUR_OF_DAY);
                         int m = now.get(Calendar.MINUTE);
                         String time = df.format(h) + ":" + df.format(m);
-                        // 出力
-                        Boolean toBtm = false;
+                        // 現在のスクロール位置を取得
                         Integer pos = recieve.getBottom() - scroll.getScrollY();
+                        // 最下行付近チェック
+                        Boolean toBtm = false;
                         if (pos < 800) {// TODO: 画面サイズ取得
                             toBtm = true;
                         }
-                        recieve.setText(recieve.getText() + time + " "
-                                + msg.obj.toString() + "(" + pos + ")\n");
+                        // 出力
+                        recieve.setText(recieve.getText() + time + " " + msg.obj.toString() + "\n");
+                        // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
                             toBtm = false;
@@ -77,12 +78,11 @@ public class IrcViewer extends Activity {
         };
         // 通信開始
         try {
-            this.irc = new Irc(this.HOST, this.PORT, this.NICK, this.handler);
-            this.irc.nick(NICK);
-            this.irc.user(LOGIN, "host", "server", "yusukezzz");
-            this.irc.join(CHANNEL);
+            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK, this.handler);
+            this.ircHost.nick(NICK);
+            this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
+            this.ircHost.join(CHANNEL);
         } catch (Exception e) {
-            // TODO: handle exception
             recieve.setText(e.getMessage());
         }
     }
@@ -91,9 +91,9 @@ public class IrcViewer extends Activity {
      * テキストをIRCサーバに送信
      */
     private void postText(String ch, String text) {
-        this.irc.privmsg(ch, text);
+        this.ircHost.privmsg(ch, text);
     }
-    
+
     private void scrollToBottom() {
         scroll.post(new Runnable() {
             public void run() {

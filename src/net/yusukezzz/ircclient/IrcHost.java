@@ -1,4 +1,4 @@
-package net.yusukezzz.ircviewer;
+package net.yusukezzz.ircclient;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,24 +8,21 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.os.Handler;
 import android.os.Message;
 
-public class Irc extends Thread {
+public class IrcHost extends Thread {
     private String         HOST;
     private Integer        PORT;
     private String         NICK;
-    private String         USER;
     private Handler        handler;
     private BufferedWriter bw;
     private BufferedReader br;
 
-    public Irc(String host, Integer port, String nick, Handler handler) {
+    public IrcHost(String host, Integer port, String nick, Handler handler) {
         this.HOST = host;
         this.PORT = port;
         this.NICK = nick;
@@ -33,10 +30,8 @@ public class Irc extends Thread {
         try {
             this.sendMsg("", this.HOST + " connecting...");
             Socket irc = new Socket(this.HOST, this.PORT);
-            this.bw = new BufferedWriter(new OutputStreamWriter(
-                    irc.getOutputStream()));
-            this.br = new BufferedReader(new InputStreamReader(
-                    irc.getInputStream(), "ISO-2022-JP"));// とりあえず文字コード決め打ち
+            this.bw = new BufferedWriter(new OutputStreamWriter(irc.getOutputStream()));
+            this.br = new BufferedReader(new InputStreamReader(irc.getInputStream(), "ISO-2022-JP"));// とりあえず文字コード決め打ち
         } catch (UnsupportedEncodingException e) {
             // TODO: handle exception
             e.printStackTrace();
@@ -57,28 +52,29 @@ public class Irc extends Thread {
             String current = null;
             while ((current = this.br.readLine()) != null) {
                 // PING PONG
-                Pattern pingRegex = Pattern.compile("^PING (:.+)",
-                        Pattern.CASE_INSENSITIVE);
+                Pattern pingRegex = Pattern.compile("^PING (:.+)", Pattern.CASE_INSENSITIVE);
                 Matcher ping = pingRegex.matcher(current);
                 if (ping.find()) {
                     this.pong(ping.group(1));
                 }
+                // system messageの表示
+                Pattern systemRegex = Pattern.compile(" \\* :(.+)");
+                Matcher system = systemRegex.matcher(current);
+                if (system.find()) {
+                    this.sendMsg("", " * " + system.group(1));
+                }
                 // JOIN の表示
-                Pattern joinRegex = Pattern.compile("JOIN :(#.+)",
-                        Pattern.CASE_INSENSITIVE);
+                Pattern joinRegex = Pattern.compile("JOIN :(#.+)", Pattern.CASE_INSENSITIVE);
                 Matcher join = joinRegex.matcher(current);
                 if (join.find()) {
-                    this.sendMsg(join.group(1), "*join " + join.group(1));
+                    this.sendMsg(join.group(1), " * join " + join.group(1));
                 }
                 // PRIVMSG のテキストをhandlerへ
-                Pattern pmsgRegex = Pattern
-                        .compile(":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)");
+                Pattern pmsgRegex = Pattern.compile(":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)");
                 Matcher pmsg = pmsgRegex.matcher(current);
                 if (pmsg.find()) {
                     String text = "<" + pmsg.group(1) + "> " + pmsg.group(3);
                     this.sendMsg(pmsg.group(2), text);
-                } else {
-                    this.sendMsg("", current);
                 }
             }
         } catch (UnknownHostException e) {
@@ -92,7 +88,7 @@ public class Irc extends Thread {
 
     /**
      * ping に返信
-     * 
+     *
      * @param String
      *            daemon
      */
@@ -108,7 +104,7 @@ public class Irc extends Thread {
 
     /**
      * ニックネームを変更する
-     * 
+     *
      * @param nick
      */
     public void nick(String nick) {
@@ -123,17 +119,15 @@ public class Irc extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
-     * 
+     *
      * @param user
      * @param hostname
      * @param server
      * @param realname
      */
-    public void user(String user, String hostname, String server,
-            String realname) {
+    public void user(String user, String hostname, String server, String realname) {
         try {
-            this.bw.write("USER " + user + " " + hostname + " " + server + " "
-                    + realname + "\n");
+            this.bw.write("USER " + user + " " + hostname + " " + server + " " + realname + "\n");
             this.bw.flush();
         } catch (IOException e) {
             // TODO 自動生成された catch ブロック
@@ -143,7 +137,7 @@ public class Irc extends Thread {
 
     /**
      * 指定channelに参加する
-     * 
+     *
      * @param ch
      */
     public void join(String ch) {
@@ -158,7 +152,7 @@ public class Irc extends Thread {
 
     /**
      * 指定channelに発言する
-     * 
+     *
      * @param ch
      * @param str
      */
@@ -177,7 +171,7 @@ public class Irc extends Thread {
 
     /**
      * 描画threadにテキストを送る
-     * 
+     *
      * @param ch
      * @param text
      */
@@ -189,7 +183,7 @@ public class Irc extends Thread {
         // chat.put("text", text);
         msg.obj = text;
         msg.what = 0;
-        Irc.this.handler.sendMessage(msg);
+        IrcHost.this.handler.sendMessage(msg);
     }
 
 }
