@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 public class Irc extends Thread {
     private String         HOST;
@@ -87,6 +86,10 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * ping に返信
+     * @param String daemon
+     */
     public void pong(String daemon) {
         try {
             this.bw.write("PONG " + daemon + "\n");
@@ -97,6 +100,10 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * ニックネームを変更する
+     * @param nick
+     */
     public void nick(String nick) {
         try {
             this.bw.write("NICK " + nick + "\n");
@@ -107,6 +114,13 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * ircサーバにユーザー情報を登録する
+     * @param user
+     * @param hostname
+     * @param server
+     * @param realname
+     */
     public void user(String user, String hostname, String server, String realname) {
         try {
             this.bw.write("USER " + user + " " + hostname + " " + server + " " + realname + "\n");
@@ -117,6 +131,10 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * 指定channelに参加する
+     * @param ch
+     */
     public void join(String ch) {
         try {
             this.bw.write("JOIN " + ch + "\n");
@@ -127,6 +145,11 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * 指定channelに発言する
+     * @param ch
+     * @param msg
+     */
     public void privmsg(String ch, String msg) {
         try {
             this.bw.write("PRIVMSG " + ch + " " + msg + "\n");
@@ -138,6 +161,11 @@ public class Irc extends Thread {
         }
     }
 
+    /**
+     * 描画threadにテキストを送る
+     * @param ch
+     * @param text
+     */
     private void sendMsg(String ch, String text) {
         Message msg;
         msg = new Message();
