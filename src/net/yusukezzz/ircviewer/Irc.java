@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -13,8 +14,9 @@ import java.util.regex.Pattern;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
-public class Irc {
+public class Irc extends Thread {
     private String         HOST;
     private Integer        PORT;
     private Handler        handler;
@@ -25,38 +27,41 @@ public class Irc {
         this.HOST = host;
         this.PORT = port;
         this.handler = handler;
-
-        // 通信用thread
-        (new Thread() {
-            public void run() {
-                try {
-                    connect();
-                } catch (Exception e) {
-                    // TODO: handle exception
-                }
-            }
-        }).start();
-    }
-
-    public void connect() {
         try {
+            this.sendMsg("", this.HOST + " connecting...");
             Socket irc = new Socket(this.HOST, this.PORT);
             this.bw = new BufferedWriter(new OutputStreamWriter(
                     irc.getOutputStream()));
             this.br = new BufferedReader(new InputStreamReader(
                     irc.getInputStream(), "ISO-2022-JP"));// とりあえず文字コード決め打ち
+        } catch (UnsupportedEncodingException e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
+        }
+        this.start();
+    }
+
+    @Override
+    public void run() {
+        try {
             // 1行ずつ処理
             String current = null;
-            while ((current = br.readLine()) != null) {
+            while ((current = this.br.readLine()) != null) {
                 // PING PONG
-                Pattern pingRegex = Pattern.compile("^PING (#.+?)",
+                Pattern pingRegex = Pattern.compile("^PING (:.+)",
                         Pattern.CASE_INSENSITIVE);
                 Matcher ping = pingRegex.matcher(current);
                 if (ping.find()) {
                     this.pong(ping.group(1));
                 }
                 // JOIN の表示
-                Pattern joinRegex = Pattern.compile("JOIN :(#.+?)",
+                Pattern joinRegex = Pattern.compile("JOIN :(#.+)",
                         Pattern.CASE_INSENSITIVE);
                 Matcher join = joinRegex.matcher(current);
                 if (join.find()) {
@@ -69,6 +74,8 @@ public class Irc {
                 if (pmsg.find()) {
                     String text = "<" + pmsg.group(1) + "> " + pmsg.group(3);
                     this.sendMsg(pmsg.group(2), text);
+                } else {
+                    this.sendMsg("", current);
                 }
             }
         } catch (UnknownHostException e) {
@@ -80,16 +87,16 @@ public class Irc {
         }
     }
 
-    public void pong(String ch) {
+    public void pong(String daemon) {
         try {
-            this.bw.write("PONG " + ch + "\n");
+            this.bw.write("PONG " + daemon + "\n");
             this.bw.flush();
         } catch (IOException e) {
             // TODO 自動生成された catch ブロック
             e.printStackTrace();
         }
     }
-    
+
     public void nick(String nick) {
         try {
             this.bw.write("NICK " + nick + "\n");
@@ -100,16 +107,16 @@ public class Irc {
         }
     }
 
-    public void user(String user) {
+    public void user(String user, String hostname, String server, String realname) {
         try {
-            this.bw.write("USER " + user + "\n");
+            this.bw.write("USER " + user + " " + hostname + " " + server + " " + realname + "\n");
             this.bw.flush();
         } catch (IOException e) {
             // TODO 自動生成された catch ブロック
             e.printStackTrace();
         }
     }
-    
+
     public void join(String ch) {
         try {
             this.bw.write("JOIN " + ch + "\n");
@@ -134,10 +141,10 @@ public class Irc {
     private void sendMsg(String ch, String text) {
         Message msg;
         msg = new Message();
-        HashMap<String, String> chat = new HashMap<String, String>();
-        chat.put("ch", ch);
-        chat.put("text", text);
-        msg.obj = chat;
+//        HashMap<String, String> chat = new HashMap<String, String>();
+//        chat.put("ch", ch);
+//        chat.put("text", text);
+        msg.obj = text;
         msg.what = 0;
         Irc.this.handler.sendMessage(msg);
     }

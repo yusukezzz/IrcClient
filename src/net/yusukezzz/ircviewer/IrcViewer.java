@@ -1,14 +1,6 @@
 package net.yusukezzz.ircviewer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +23,7 @@ public class IrcViewer extends Activity {
     private EditText sendtxt;
     private Button   postbtn;
     private Handler  handler;
-    private Irc irc;
+    private Irc      irc;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,18 +48,24 @@ public class IrcViewer extends Activity {
                 switch (msg.what) {
                     case 0:
                         // 出力
-                        HashMap<String,String> chat = (HashMap<String,String>) msg.obj;
-                        recieve.setText(recieve.getText() + chat.get("text").toString()
+                        recieve.setText(recieve.getText() + msg.obj.toString()
                                 + "\n");
                 }
                 super.handleMessage(msg);
             }
         };
         // 通信開始
-        this.irc = new Irc(this.HOST, this.PORT, this.handler);
-        this.irc.join(CHANNEL);
+        try {
+            this.irc = new Irc(this.HOST, this.PORT, this.handler);
+            this.irc.nick(NICK);
+            this.irc.user(LOGIN, "host", "server", "yusukezzz");
+            this.irc.join(CHANNEL);
+        } catch (NullPointerException e) {
+            // TODO: handle exception
+            recieve.setText(e.getMessage());
+        }
     }
-    
+
     /**
      * テキストをIRCサーバに送信
      */
