@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,13 +19,16 @@ import android.os.Message;
 public class Irc extends Thread {
     private String         HOST;
     private Integer        PORT;
+    private String         NICK;
+    private String         USER;
     private Handler        handler;
     private BufferedWriter bw;
     private BufferedReader br;
 
-    public Irc(String host, Integer port, Handler handler) {
+    public Irc(String host, Integer port, String nick, Handler handler) {
         this.HOST = host;
         this.PORT = port;
+        this.NICK = nick;
         this.handler = handler;
         try {
             this.sendMsg("", this.HOST + " connecting...");
@@ -88,7 +92,9 @@ public class Irc extends Thread {
 
     /**
      * ping に返信
-     * @param String daemon
+     * 
+     * @param String
+     *            daemon
      */
     public void pong(String daemon) {
         try {
@@ -102,6 +108,7 @@ public class Irc extends Thread {
 
     /**
      * ニックネームを変更する
+     * 
      * @param nick
      */
     public void nick(String nick) {
@@ -116,14 +123,17 @@ public class Irc extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
+     * 
      * @param user
      * @param hostname
      * @param server
      * @param realname
      */
-    public void user(String user, String hostname, String server, String realname) {
+    public void user(String user, String hostname, String server,
+            String realname) {
         try {
-            this.bw.write("USER " + user + " " + hostname + " " + server + " " + realname + "\n");
+            this.bw.write("USER " + user + " " + hostname + " " + server + " "
+                    + realname + "\n");
             this.bw.flush();
         } catch (IOException e) {
             // TODO 自動生成された catch ブロック
@@ -133,6 +143,7 @@ public class Irc extends Thread {
 
     /**
      * 指定channelに参加する
+     * 
      * @param ch
      */
     public void join(String ch) {
@@ -147,14 +158,17 @@ public class Irc extends Thread {
 
     /**
      * 指定channelに発言する
+     * 
      * @param ch
-     * @param msg
+     * @param str
      */
-    public void privmsg(String ch, String msg) {
+    public void privmsg(String ch, String str) {
         try {
-            this.bw.write("PRIVMSG " + ch + " " + msg + "\n");
+            // 発言する
+            this.bw.write("PRIVMSG " + ch + " " + str + "\n");
             this.bw.flush();
-            this.sendMsg(ch, msg);
+            // handlerに通知して描画してもらう
+            this.sendMsg(ch, "<" + this.NICK + "> " + str);
         } catch (IOException e) {
             // TODO 自動生成された catch ブロック
             e.printStackTrace();
@@ -163,15 +177,16 @@ public class Irc extends Thread {
 
     /**
      * 描画threadにテキストを送る
+     * 
      * @param ch
      * @param text
      */
     private void sendMsg(String ch, String text) {
         Message msg;
         msg = new Message();
-//        HashMap<String, String> chat = new HashMap<String, String>();
-//        chat.put("ch", ch);
-//        chat.put("text", text);
+        // HashMap<String, String> chat = new HashMap<String, String>();
+        // chat.put("ch", ch);
+        // chat.put("text", text);
         msg.obj = text;
         msg.what = 0;
         Irc.this.handler.sendMessage(msg);
