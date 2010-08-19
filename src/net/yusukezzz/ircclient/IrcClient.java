@@ -6,9 +6,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -27,7 +30,21 @@ public class IrcClient extends Activity {
     private Button     postbtn;
     private Handler    handler;
     private IrcHost    ircHost;
+    private Integer Height;
+    private Integer Width;
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // 画面情報取得
+        WindowManager windowMng = getWindowManager();
+        Display display = windowMng.getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getMetrics(displayMetrics);
+        Height = display.getHeight();
+        Width = display.getWidth();
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +79,7 @@ public class IrcClient extends Activity {
                         Integer pos = recieve.getBottom() - scroll.getScrollY();
                         // 最下行付近チェック
                         Boolean toBtm = false;
-                        if (pos < 800) {// TODO: 画面サイズ取得
+                        if (pos < Height) {
                             toBtm = true;
                         }
                         // 出力
