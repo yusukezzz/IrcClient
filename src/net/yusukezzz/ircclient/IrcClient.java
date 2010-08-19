@@ -31,7 +31,6 @@ public class IrcClient extends Activity {
     private Handler    handler;
     private IrcHost    ircHost;
     private Integer Height;
-    private Integer Width;
 
     @Override
     public void onResume() {
@@ -43,7 +42,6 @@ public class IrcClient extends Activity {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         display.getMetrics(displayMetrics);
         Height = display.getHeight();
-        Width = display.getWidth();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
