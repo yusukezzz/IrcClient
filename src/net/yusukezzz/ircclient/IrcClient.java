@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 public class IrcClient extends Activity {
     private String     HOST    = "irc.friend-chat.jp";
-    private Integer    PORT    = 6660;                    // なんか6667は混んでるらしいので
+    private Integer    PORT    = 6660;                // なんか6667は混んでるらしいので
     private String     NICK    = "androzzz";
     private String     LOGIN   = "androzzz";
     private String     CHANNEL = "#yusukezzz_test";
@@ -30,7 +30,7 @@ public class IrcClient extends Activity {
     private Button     postbtn;
     private Handler    handler;
     private IrcHost    ircHost;
-    private Integer Height;
+    private Integer    Height;
 
     @Override
     public void onResume() {
@@ -43,6 +43,7 @@ public class IrcClient extends Activity {
         display.getMetrics(displayMetrics);
         Height = display.getHeight();
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,9 +67,10 @@ public class IrcClient extends Activity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case 0:
-                        // 現在時刻の取得
+                        // 2桁で表示するため
                         DecimalFormat df = new DecimalFormat();
                         df.applyLocalizedPattern("00");
+                        // 現在時刻の取得
                         Calendar now = Calendar.getInstance();
                         int h = now.get(Calendar.HOUR_OF_DAY);
                         int m = now.get(Calendar.MINUTE);
@@ -81,7 +83,8 @@ public class IrcClient extends Activity {
                             toBtm = true;
                         }
                         // 出力
-                        recieve.setText(recieve.getText() + time + " " + msg.obj.toString() + "\n");
+                        recieve.setText(recieve.getText() + time + " "
+                                + msg.obj.toString() + "\n");
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -93,7 +96,8 @@ public class IrcClient extends Activity {
         };
         // 通信開始
         try {
-            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK, this.handler);
+            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
+                    this.handler);
             this.ircHost.nick(NICK);
             this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
             this.ircHost.join(CHANNEL);
