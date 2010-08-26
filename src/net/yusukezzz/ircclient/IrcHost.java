@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.os.Handler;
 import android.os.Message;
@@ -19,22 +17,24 @@ public class IrcHost extends Thread {
     private String                      HOST;
     private Integer                     PORT;
     private String                      NICK;
+    private String                      CHARSET;
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, Integer port, String nick, Handler handler) {
+    public IrcHost(String host, Integer port, String nick, String charset, Handler handler) {
         this.HOST = host;
         this.PORT = port;
         this.NICK = nick;
+        this.CHARSET = charset;
         this.handler = handler;
         try {
             this.sendMsg("", this.HOST + " connecting...");
             Socket irc = new Socket(this.HOST, this.PORT);
             this.bw = new BufferedWriter(new OutputStreamWriter(irc.getOutputStream()));
-            this.br = new BufferedReader(new InputStreamReader(irc.getInputStream(), "ISO-2022-JP"));// とりあえず文字コード決め打ち
+            this.br = new BufferedReader(new InputStreamReader(irc.getInputStream(), this.CHARSET));// とりあえず文字コード決め打ち
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -67,8 +67,7 @@ public class IrcHost extends Thread {
                             this.sendMsg(res[1], " * join " + res[1]);
                             break;
                         case IrcReply.RID_PRIVMSG:
-                            String text = "<" + res[1] + "> " + res[3];
-                            this.sendMsg(res[2], text);
+                            this.sendMsg(res[2], "<" + res[1] + "> " + res[3]);
                             break;
                         case IrcReply.RID_NAMES:
                             this.sendMsg(res[1], " * names " + res[2]);
@@ -90,8 +89,7 @@ public class IrcHost extends Thread {
     /**
      * ping に返信
      *
-     * @param String
-     *            daemon
+     * @param daemon
      */
     public void pong(String daemon) {
         try {

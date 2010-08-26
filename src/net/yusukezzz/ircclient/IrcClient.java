@@ -19,7 +19,8 @@ import android.widget.TextView;
 
 public class IrcClient extends Activity {
     private String     HOST    = "irc.friend-chat.jp";
-    private Integer    PORT    = 6660;                // なんか6667は混んでるらしいので
+    private Integer    PORT    = 6667;
+    private String     CHARSET = "ISO-2022-JP";
     private String     NICK    = "androzzz";
     private String     LOGIN   = "androzzz";
     private String     CHANNEL = "#yusukezzz_test";
@@ -67,14 +68,6 @@ public class IrcClient extends Activity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case 0:
-                        // 2桁で表示するため
-                        DecimalFormat df = new DecimalFormat();
-                        df.applyLocalizedPattern("00");
-                        // 現在時刻の取得
-                        Calendar now = Calendar.getInstance();
-                        int h = now.get(Calendar.HOUR_OF_DAY);
-                        int m = now.get(Calendar.MINUTE);
-                        String time = df.format(h) + ":" + df.format(m);
                         // 現在のスクロール位置を取得
                         Integer pos = recieve.getBottom() - scroll.getScrollY();
                         // 最下行付近チェック
@@ -83,8 +76,8 @@ public class IrcClient extends Activity {
                             toBtm = true;
                         }
                         // 出力
-                        recieve.setText(recieve.getText() + time + " "
-                                + msg.obj.toString() + "\n");
+                        recieve.setText(recieve.getText() + getTime() + " " + msg.obj.toString()
+                                + "\n");
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -96,8 +89,7 @@ public class IrcClient extends Activity {
         };
         // 通信開始
         try {
-            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
-                    this.handler);
+            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK, this.CHARSET, this.handler);
             this.ircHost.nick(NICK);
             this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
             this.ircHost.join(CHANNEL);
@@ -113,11 +105,31 @@ public class IrcClient extends Activity {
         this.ircHost.privmsg(ch, text);
     }
 
+    /**
+     * 一番下までスクロールする
+     */
     private void scrollToBottom() {
         scroll.post(new Runnable() {
             public void run() {
                 scroll.fullScroll(ScrollView.FOCUS_DOWN);
             }
         });
+    }
+
+    /**
+     * hh:mm形式の現在時間文字列を返す
+     *
+     * @return time hh:mm
+     */
+    private String getTime() {
+        // 2桁で表示するため
+        DecimalFormat df = new DecimalFormat();
+        df.applyLocalizedPattern("00");
+        // 現在時刻の取得
+        Calendar now = Calendar.getInstance();
+        int h = now.get(Calendar.HOUR_OF_DAY);
+        int m = now.get(Calendar.MINUTE);
+        String time = df.format(h) + ":" + df.format(m);
+        return time;
     }
 }
