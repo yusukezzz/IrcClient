@@ -17,6 +17,7 @@ public class IrcHost extends Thread {
     private String                  HOST;
     private Integer                 PORT;
     private String                  NICK;
+    private String                  LOGIN;
     private String                  CHARSET;
     private Handler                 handler;
     private BufferedWriter          bw;
@@ -24,10 +25,11 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, Integer port, String nick, String charset, Handler handler) {
+    public IrcHost(String host, Integer port, String nick, String login, String charset, Handler handler) {
         this.HOST = host;
         this.PORT = port;
         this.NICK = nick;
+        this.LOGIN = login;
         this.CHARSET = charset;
         this.handler = handler;
         try {
@@ -183,7 +185,7 @@ public class IrcHost extends Thread {
     }
 
     /**
-     * 描画threadにテキストを送る
+     * handlerにテキストを送る
      *
      * @param ch
      * @param text

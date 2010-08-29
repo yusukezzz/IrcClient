@@ -2,6 +2,8 @@ package net.yusukezzz.ircclient;
 
 import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,23 +17,37 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
-    private String     HOST    = "chat.freenode.net";//"irc.friend-chat.jp";
-    private Integer    PORT    = 6667;
-    private String     CHARSET = "ISO-2022-JP";
-    private String     NICK    = "androzzz";
-    private String     LOGIN   = "androzzz";
-    private String     CHANNEL = "#yusukezzz_test";
+    // private String HOST = "chat.freenode.net";//"irc.friend-chat.jp";
+    // private Integer PORT = 6667;
+    // private String CHARSET = "ISO-2022-JP";
+    // private String NICK = "androzzz";
+    // private String LOGIN = "androzzz";
+    // private String CHANNEL = "#yusukezzz_test";
+    private IrcHost                  currentHost;
+    private IrcChannel               currentChannel;
+    private HashMap<String, IrcHost> hosts = new HashMap<String, IrcHost>();
 
-    private ScrollView scroll;
-    private TextView   recieve;
-    private EditText   sendtxt;
-    private Button     postbtn;
-    private Handler    handler;
-    private IrcHost    ircHost;
-    private Integer    Height;
+    // channel view
+    private ScrollView               scroll;
+    private TextView                 recieve;
+    private EditText                 sendtxt;
+    private Button                   postbtn;
+
+    // add host view
+    private String                   hostname;
+    private Integer                  port;
+    private String                   nick;
+    private String                   login;
+    private Spinner                  charset;
+    private Button                   addhostbtn;
+
+    private Handler                  handler;
+    private IrcHost                  ircHost;
+    private Integer                  Height;
 
     @Override
     public void onResume() {
@@ -49,7 +65,13 @@ public class IrcClient extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.main);
+        boolean exists_hosts = false;
+        if (exists_hosts) {
+            // TODO: ホストのリストを表示
+        } else {
+            // ホスト追加画面
+            this.renderAddHost();
+        }
         // viewの部品準備
         scroll = (ScrollView) this.findViewById(R.id.ScrollView01);
         recieve = (TextView) this.findViewById(R.id.TextView01);
@@ -59,7 +81,9 @@ public class IrcClient extends Activity {
         postbtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                IrcClient.this.postText(CHANNEL, sendtxt.getText().toString());
+                if (v.toString() == "channel") {
+                    IrcClient.this.postText(currentChannel.getName(), sendtxt.getText().toString());
+                }
             }
         });
         // 受信したテキストをTextViewに出力するhandler
@@ -87,15 +111,16 @@ public class IrcClient extends Activity {
                 super.handleMessage(msg);
             }
         };
-        // 通信開始
-        try {
-            this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK, this.CHARSET, this.handler);
-            this.ircHost.nick(NICK);
-            this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
-            this.ircHost.join(CHANNEL);
-        } catch (Exception e) {
-            recieve.setText(e.getMessage());
-        }
+        // // 通信開始
+        // try {
+        // this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
+        // this.CHARSET, this.handler);
+        // this.ircHost.nick(NICK);
+        // this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
+        // this.ircHost.join(CHANNEL);
+        // } catch (Exception e) {
+        // recieve.setText(e.getMessage());
+        // }
     }
 
     /**
@@ -131,5 +156,30 @@ public class IrcClient extends Activity {
         int m = now.get(Calendar.MINUTE);
         String time = df.format(h) + ":" + df.format(m);
         return time;
+    }
+
+    /**
+     * ホスト追加画面の用意
+     */
+    private void renderAddHost() {
+        // レイアウトをホスト追加画面に
+        setContentView(R.layout.addhost);
+        // 要素の用意
+        this.hostname = this.findViewById(R.id.addhost_hostname).toString();
+        this.port = Integer.parseInt(this.findViewById(R.id.addhost_port).toString());
+        this.nick = this.findViewById(R.id.addhost_nick).toString();
+        this.login = this.findViewById(R.id.addhost_login).toString();
+        this.charset = (Spinner) this.findViewById(R.id.addhost_charset);
+        this.addhostbtn = (Button) this.findViewById(R.id.addhost_addbtn);
+        // 追加ボタンにイベントをセット
+        addhostbtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // ホストの追加
+                // TODO: 入力チェック
+                hosts.put(hostname, new IrcHost(hostname, port, nick, login, charset
+                        .getSelectedItem().toString(), handler));
+            }
+        });
     }
 }
