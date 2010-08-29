@@ -14,13 +14,13 @@ import android.os.Handler;
 import android.os.Message;
 
 public class IrcHost extends Thread {
-    private String                      HOST;
-    private Integer                     PORT;
-    private String                      NICK;
-    private String                      CHARSET;
-    private Handler                     handler;
-    private BufferedWriter              bw;
-    private BufferedReader              br;
+    private String                  HOST;
+    private Integer                 PORT;
+    private String                  NICK;
+    private String                  CHARSET;
+    private Handler                 handler;
+    private BufferedWriter          bw;
+    private BufferedReader          br;
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
@@ -73,6 +73,7 @@ public class IrcHost extends Thread {
                             this.sendMsg(res[1], " * names " + res[2]);
                             break;
                         default:
+                            // this.sendMsg("", current);
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {

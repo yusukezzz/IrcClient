@@ -18,7 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
-    private String     HOST    = "irc.friend-chat.jp";
+    private String     HOST    = "chat.freenode.net";//"irc.friend-chat.jp";
     private Integer    PORT    = 6667;
     private String     CHARSET = "ISO-2022-JP";
     private String     NICK    = "androzzz";
