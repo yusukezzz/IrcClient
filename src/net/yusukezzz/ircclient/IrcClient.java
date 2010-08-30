@@ -14,10 +14,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
@@ -42,8 +46,12 @@ public class IrcClient extends Activity {
     private Integer                  port;
     private String                   nick;
     private String                   login;
-    private Spinner                  charset;
+    private String                   charset;
     private Button                   addhostbtn;
+    
+    // host list
+    private ListView hostlist;
+    private Button newhostbtn;
 
     private Handler                  handler;
     private IrcHost                  ircHost;
@@ -72,20 +80,6 @@ public class IrcClient extends Activity {
             // ホスト追加画面
             this.renderAddHost();
         }
-        // viewの部品準備
-        scroll = (ScrollView) this.findViewById(R.id.ScrollView01);
-        recieve = (TextView) this.findViewById(R.id.TextView01);
-        postbtn = (Button) this.findViewById(R.id.Button01);
-        sendtxt = (EditText) this.findViewById(R.id.EditText01);
-        // 送信ボタンにイベントをセット
-        postbtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.toString() == "channel") {
-                    IrcClient.this.postText(currentChannel.getName(), sendtxt.getText().toString());
-                }
-            }
-        });
         // 受信したテキストをTextViewに出力するhandler
         this.handler = new Handler() {
             @Override
@@ -100,8 +94,8 @@ public class IrcClient extends Activity {
                             toBtm = true;
                         }
                         // 出力
-                        recieve.setText(recieve.getText() + getTime() + " " + msg.obj.toString()
-                                + "\n");
+                        recieve.setText(recieve.getText() + getTime() + " "
+                                + msg.obj.toString() + "\n");
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -116,7 +110,7 @@ public class IrcClient extends Activity {
         // this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
         // this.CHARSET, this.handler);
         // this.ircHost.nick(NICK);
-        // this.ircHost.user(LOGIN, "host", "server", "yusukezzz");
+        // this.ircHost.user();
         // this.ircHost.join(CHANNEL);
         // } catch (Exception e) {
         // recieve.setText(e.getMessage());
@@ -143,7 +137,7 @@ public class IrcClient extends Activity {
 
     /**
      * hh:mm形式の現在時間文字列を返す
-     *
+     * 
      * @return time hh:mm
      */
     private String getTime() {
@@ -159,17 +153,44 @@ public class IrcClient extends Activity {
     }
 
     /**
-     * ホスト追加画面の用意
+     * channel画面
+     * 
+     * @param ch
+     */
+    private void renderChannel(String ch) {
+        // レイアウトをchannel画面に
+        setContentView(R.layout.main);
+        // channelの部品準備
+        scroll = (ScrollView) this.findViewById(R.id.ScrollView01);
+        recieve = (TextView) this.findViewById(R.id.TextView01);
+        postbtn = (Button) this.findViewById(R.id.Button01);
+        sendtxt = (EditText) this.findViewById(R.id.EditText01);
+        // 送信ボタンにイベントをセット
+        postbtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.toString() == "channel") {
+                    IrcClient.this.postText(currentChannel.getName(), sendtxt
+                            .getText().toString());
+                }
+            }
+        });
+    }
+
+    /**
+     * ホスト追加画面
      */
     private void renderAddHost() {
         // レイアウトをホスト追加画面に
         setContentView(R.layout.addhost);
         // 要素の用意
         this.hostname = this.findViewById(R.id.addhost_hostname).toString();
-        this.port = Integer.parseInt(this.findViewById(R.id.addhost_port).toString());
+        this.port = Integer.parseInt(this.findViewById(R.id.addhost_port)
+                .toString());
         this.nick = this.findViewById(R.id.addhost_nick).toString();
         this.login = this.findViewById(R.id.addhost_login).toString();
-        this.charset = (Spinner) this.findViewById(R.id.addhost_charset);
+        Spinner charspn = (Spinner) this.findViewById(R.id.addhost_charset);
+        this.charset = charspn.getSelectedItem().toString();
         this.addhostbtn = (Button) this.findViewById(R.id.addhost_addbtn);
         // 追加ボタンにイベントをセット
         addhostbtn.setOnClickListener(new OnClickListener() {
@@ -177,9 +198,29 @@ public class IrcClient extends Activity {
             public void onClick(View v) {
                 // ホストの追加
                 // TODO: 入力チェック
-                hosts.put(hostname, new IrcHost(hostname, port, nick, login, charset
-                        .getSelectedItem().toString(), handler));
+                hosts.put(hostname, new IrcHost(hostname, port, nick, login,
+                        charset, handler));
+                renderHostList();
             }
         });
     }
+
+    /**
+     * 登録済みホスト一覧画面
+     */
+    private void renderHostList() {
+        setContentView(R.layout.hostlist);
+        hostlist = (ListView) this.findViewById(R.id.hostlist);
+        newhostbtn = (Button) this.findViewById(R.id.newhostbtn);
+        // ホスト追加画面に遷移
+        newhostbtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                renderAddHost();
+            }
+        });
+    }
+    
+//    public class HostListAdapter extends ArrayAdapter {
+//    }
 }

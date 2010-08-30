@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -95,12 +96,7 @@ public class IrcHost extends Thread {
      * @param daemon
      */
     public void pong(String daemon) {
-        try {
-            this.bw.write("PONG " + daemon + "\n");
-            this.bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.write("PONG " + daemon + "\n");
     }
 
     /**
@@ -109,12 +105,7 @@ public class IrcHost extends Thread {
      * @param nick
      */
     public void nick(String nick) {
-        try {
-            this.bw.write("NICK " + nick + "\n");
-            this.bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.write("NICK " + nick + "\n");
     }
 
     /**
@@ -125,13 +116,13 @@ public class IrcHost extends Thread {
      * @param server
      * @param realname
      */
-    public void user(String user, String hostname, String server, String realname) {
+    public void user() {
+        String hostname = "";
         try {
-            this.bw.write("USER " + user + " " + hostname + " " + server + " " + realname + "\n");
-            this.bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
         }
+        this.write("USER " + NICK + " " + hostname + " " + HOST + " " + LOGIN + "\n");
     }
 
     /**
@@ -140,16 +131,11 @@ public class IrcHost extends Thread {
      * @param ch
      */
     public void join(String ch) {
-        try {
-            this.bw.write("JOIN " + ch + "\n");
-            this.bw.flush();
-            // チャンネルの追加
-            channels.put(ch, new IrcChannel(ch));
-            // メンバーの取得
-            // this.names(ch);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.write("JOIN " + ch + "\n");
+        // チャンネルの追加
+        channels.put(ch, new IrcChannel(ch));
+        // メンバーの取得
+        // this.names(ch);
     }
 
     /**
@@ -158,12 +144,7 @@ public class IrcHost extends Thread {
      * @param ch
      */
     public void names(String ch) {
-        try {
-            this.bw.write("NAMES " + ch + "\n");
-            this.bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.write("NAMES " + ch + "\n");
     }
 
     /**
@@ -173,14 +154,20 @@ public class IrcHost extends Thread {
      * @param str
      */
     public void privmsg(String ch, String str) {
+        this.write("PRIVMSG " + ch + " " + str + "\n");
+        this.sendMsg(ch, "<" + this.NICK + "> " + str);
+    }
+    
+    /**
+     * 実際にbufferWriterで書き込むメソッド
+     * @param cmd
+     */
+    private void write(String cmd) {
         try {
-            // 発言する
-            this.bw.write("PRIVMSG " + ch + " " + str + "\n");
+            this.bw.write(cmd);
             this.bw.flush();
-            // handlerに通知して描画してもらう
-            this.sendMsg(ch, "<" + this.NICK + "> " + str);
         } catch (IOException e) {
-            e.printStackTrace();
+            // TODO: handle exception
         }
     }
 
