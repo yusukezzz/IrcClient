@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,14 +15,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
@@ -31,27 +27,20 @@ public class IrcClient extends Activity {
     // private String NICK = "androzzz";
     // private String LOGIN = "androzzz";
     // private String CHANNEL = "#yusukezzz_test";
+
+    // Activity request code
+    private static final int         SHOW_ADDHOST  = 0;
+    private static final int         SHOW_HOSTLIST = 1;
+
     private IrcHost                  currentHost;
     private IrcChannel               currentChannel;
-    private HashMap<String, IrcHost> hosts = new HashMap<String, IrcHost>();
+    private HashMap<String, IrcHost> hosts         = new HashMap<String, IrcHost>();
 
     // channel view
     private ScrollView               scroll;
     private TextView                 recieve;
     private EditText                 sendtxt;
     private Button                   postbtn;
-
-    // add host view
-    private String                   hostname;
-    private Integer                  port;
-    private String                   nick;
-    private String                   login;
-    private String                   charset;
-    private Button                   addhostbtn;
-    
-    // host list
-    private ListView hostlist;
-    private Button newhostbtn;
 
     private Handler                  handler;
     private IrcHost                  ircHost;
@@ -73,12 +62,15 @@ public class IrcClient extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
         boolean exists_hosts = false;
         if (exists_hosts) {
             // TODO: ホストのリストを表示
         } else {
             // ホスト追加画面
-            this.renderAddHost();
+            Intent intent = new Intent(IrcClient.this, AddHost.class);
+            intent.putExtra("HOSTS", hosts);
+            startActivityForResult(intent, SHOW_ADDHOST);
         }
         // 受信したテキストをTextViewに出力するhandler
         this.handler = new Handler() {
@@ -115,6 +107,23 @@ public class IrcClient extends Activity {
         // } catch (Exception e) {
         // recieve.setText(e.getMessage());
         // }
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resCode, Intent data) {
+        switch (reqCode) {
+            case SHOW_ADDHOST:
+                if (resCode == RESULT_OK) {
+                    // ホスト一覧へ
+                }
+                break;
+            case SHOW_HOSTLIST:
+                if (resCode == RESULT_OK) {
+                    // default
+                }
+            default:
+                break;
+        }
     }
 
     /**
@@ -176,51 +185,4 @@ public class IrcClient extends Activity {
             }
         });
     }
-
-    /**
-     * ホスト追加画面
-     */
-    private void renderAddHost() {
-        // レイアウトをホスト追加画面に
-        setContentView(R.layout.addhost);
-        // 要素の用意
-        this.hostname = this.findViewById(R.id.addhost_hostname).toString();
-        this.port = Integer.parseInt(this.findViewById(R.id.addhost_port)
-                .toString());
-        this.nick = this.findViewById(R.id.addhost_nick).toString();
-        this.login = this.findViewById(R.id.addhost_login).toString();
-        Spinner charspn = (Spinner) this.findViewById(R.id.addhost_charset);
-        this.charset = charspn.getSelectedItem().toString();
-        this.addhostbtn = (Button) this.findViewById(R.id.addhost_addbtn);
-        // 追加ボタンにイベントをセット
-        addhostbtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // ホストの追加
-                // TODO: 入力チェック
-                hosts.put(hostname, new IrcHost(hostname, port, nick, login,
-                        charset, handler));
-                renderHostList();
-            }
-        });
-    }
-
-    /**
-     * 登録済みホスト一覧画面
-     */
-    private void renderHostList() {
-        setContentView(R.layout.hostlist);
-        hostlist = (ListView) this.findViewById(R.id.hostlist);
-        newhostbtn = (Button) this.findViewById(R.id.newhostbtn);
-        // ホスト追加画面に遷移
-        newhostbtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                renderAddHost();
-            }
-        });
-    }
-    
-//    public class HostListAdapter extends ArrayAdapter {
-//    }
 }
