@@ -1,5 +1,6 @@
 package net.yusukezzz.ircclient;
 
+import java.io.FileInputStream;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
