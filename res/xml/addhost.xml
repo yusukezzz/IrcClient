@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-  xmlns:android="http://schemas.android.com/apk/res/android">
-<EditTextPreference android:key="hostname" android:title="Hostname"></EditTextPreference>
-<EditTextPreference android:title="Port" android:key="port"></EditTextPreference>
-<EditTextPreference android:title="Nickname" android:key="nick"></EditTextPreference>
-<EditTextPreference android:title="Login name" android:key="login"></EditTextPreference>
-<EditTextPreference android:title="Charset" android:layout="@array/charsets" android:key="charset"></EditTextPreference>
-</PreferenceScreen>

@@ -1,11 +1,12 @@
 package net.yusukezzz.ircclient;
 
-import java.io.FileInputStream;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +33,7 @@ public class IrcClient extends Activity {
     // Activity request code
     private static final int         SHOW_ADDHOST  = 0;
     private static final int         SHOW_HOSTLIST = 1;
+    private EditText addhostname;
 
     private IrcHost                  currentHost;
     private IrcChannel               currentChannel;
@@ -68,10 +70,8 @@ public class IrcClient extends Activity {
         if (exists_hosts) {
             // TODO: ホストのリストを表示
         } else {
-            // ホスト追加画面
-            Intent intent = new Intent(IrcClient.this, AddHost.class);
-            intent.putExtra("HOSTS", hosts);
-            startActivityForResult(intent, SHOW_ADDHOST);
+            // ホスト追加
+            this.addHost();
         }
         // 受信したテキストをTextViewに出力するhandler
         this.handler = new Handler() {
@@ -116,6 +116,7 @@ public class IrcClient extends Activity {
             case SHOW_ADDHOST:
                 if (resCode == RESULT_OK) {
                     // ホスト一覧へ
+                    setContentView(R.layout.main);
                 }
                 break;
             case SHOW_HOSTLIST:
@@ -147,7 +148,7 @@ public class IrcClient extends Activity {
 
     /**
      * hh:mm形式の現在時間文字列を返す
-     * 
+     *
      * @return time hh:mm
      */
     private String getTime() {
@@ -162,9 +163,24 @@ public class IrcClient extends Activity {
         return time;
     }
 
+    public void addHost() {
+        addhostname = new EditText(this);
+        new AlertDialog.Builder(this)
+        .setTitle("put new hostname")
+        .setView(addhostname)
+        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(IrcClient.this, EditHost.class);
+                intent.putExtra("hostname", addhostname.getText().toString());
+                startActivityForResult(intent, SHOW_ADDHOST);
+            }
+        }).show();
+    }
+
     /**
      * channel画面
-     * 
+     *
      * @param ch
      */
     private void renderChannel(String ch) {

@@ -13,7 +13,7 @@
 </activity>
 
     
-<activity android:name="AddHost" android:label="@string/app_name" android:windowSoftInputMode="adjustResize">
+<activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="EditHost">
 </activity>
 </application>
     <uses-sdk android:minSdkVersion="4" />

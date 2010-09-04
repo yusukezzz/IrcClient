@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android" android:title="EditHost">
+<PreferenceCategory><EditTextPreference android:key="port" android:defaultValue="6667" android:title="Port number" android:summary="default 6667"></EditTextPreference><EditTextPreference android:title="Nickname" android:key="nick" android:summary="your screen name"></EditTextPreference><EditTextPreference android:title="Login name" android:key="login"></EditTextPreference><EditTextPreference android:title="Charset" android:key="charset"></EditTextPreference></PreferenceCategory>
+
+
+
+
+
+</PreferenceScreen>
