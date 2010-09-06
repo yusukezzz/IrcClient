@@ -4,18 +4,18 @@
   android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical">
 
 <TextView android:id="@+id/TextView03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="24px" android:text="Add server setting"></TextView><LinearLayout android:id="@+id/LinearLayout01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="host name" android:layout_weight="0" android:id="@+id/TextView01"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_weight="1" android:inputType="text" android:id="@+id/addhost_hostname" android:layout_width="fill_parent"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_weight="1" android:inputType="text" android:layout_width="fill_parent" android:id="@+id/edithost_hostname"></EditText>
 </LinearLayout><LinearLayout android:id="@+id/LinearLayout02" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical"><TextView android:id="@+id/TextView02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="port" android:layout_weight="0"></TextView>
-<EditText android:layout_height="wrap_content" android:text="6667" android:layout_weight="1" android:layout_width="fill_parent" android:inputType="numberSigned" android:id="@+id/addhost_port"></EditText>
+<EditText android:layout_height="wrap_content" android:text="6667" android:layout_weight="1" android:layout_width="fill_parent" android:inputType="numberSigned" android:id="@+id/edithost_port"></EditText>
 </LinearLayout><LinearLayout android:id="@+id/LinearLayout03" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical"><TextView android:id="@+id/TextView04" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="nick name" android:layout_weight="0"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/addhost_nick"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/edithost_nick"></EditText>
 </LinearLayout><LinearLayout android:id="@+id/LinearLayout04" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical"><TextView android:id="@+id/TextView05" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="login name" android:layout_weight="0"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:id="@+id/addhost_login"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:id="@+id/edithost_login"></EditText>
 </LinearLayout><LinearLayout android:id="@+id/LinearLayout05" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingBottom="20px" android:orientation="vertical"><TextView android:id="@+id/TextView06" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="charset" android:layout_weight="0"></TextView>
 
 
-<Spinner android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:entries="@array/charsets" android:id="@+id/addhost_charset"></Spinner>
-</LinearLayout><Button android:layout_height="wrap_content" android:text="add" android:layout_width="fill_parent" android:id="@+id/addhost_addbtn"></Button>
+<Spinner android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:entries="@array/charsets" android:id="@+id/edithost_charset"></Spinner>
+</LinearLayout><Button android:layout_height="wrap_content" android:text="add" android:layout_width="fill_parent" android:id="@+id/edithost_btn"></Button>
 
 
 
