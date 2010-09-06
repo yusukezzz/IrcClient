@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView.BufferType;
 
 public class EditHost extends Activity {
     // add host view
@@ -21,6 +22,15 @@ public class EditHost extends Activity {
     private EditText login;
     private String charset;
     private Button edithostbtn;
+
+    private MyJson myjson;
+    private JSONArray json;
+    
+    public EditHost() {
+        this.myjson = new MyJson(this);
+        // 読み込み
+        this.json = myjson.readFile(IrcClient.HOSTS_FILE);
+    }
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,9 +47,13 @@ public class EditHost extends Activity {
         this.edithostbtn = (Button) this.findViewById(R.id.edithost_btn);
         
         Intent i = getIntent();
-        String host_no = i.getStringExtra("host_no");
-        if (host_no != null) {
-            // edit
+        int host_no = i.getIntExtra("host_no", -1);
+        if (host_no != -1) {
+            try {
+                JSONObject host = json.getJSONObject(host_no);
+                hostname.setText(host.get("name").toString(), BufferType.NORMAL);
+            } catch (JSONException e) {
+            }
         }
         
         edithostbtn.setOnClickListener(new OnClickListener() {
@@ -48,9 +62,6 @@ public class EditHost extends Activity {
                 // ホストを保存する
                 // TODO: 入力チェック
                 try {
-                    // 読み込み
-                    MyJson myjson = new MyJson(getApplicationContext());
-                    JSONArray json = myjson.readFile(IrcClient.HOSTS_FILE);
                     // 追加
                     JSONObject new_host = new JSONObject();
                     new_host.put("name", hostname.getText());
