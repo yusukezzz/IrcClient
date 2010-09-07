@@ -23,22 +23,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
-    // private String HOST = "chat.freenode.net";//"irc.friend-chat.jp";
-    // private Integer PORT = 6667;
-    // private String CHARSET = "ISO-2022-JP";
-    // private String NICK = "androzzz";
-    // private String LOGIN = "androzzz";
-    // private String CHANNEL = "#yusukezzz_test";
 
     // Activity request code
     private static final int         SHOW_ADDHOST  = 0;
     private static final int         SHOW_HOSTLIST = 1;
     public static final String       HOSTS_FILE    = "hosts.json";
-    private EditText                 addhostname;
 
     private IrcHost                  currentHost;
     private IrcChannel               currentChannel;
-    private HashMap<String, IrcHost> hosts         = new HashMap<String, IrcHost>();
 
     // channel view
     private ScrollView               scroll;
@@ -167,19 +159,7 @@ public class IrcClient extends Activity {
     }
 
     public void addHost() {
-        addhostname = new EditText(this);
-        new AlertDialog.Builder(this).setTitle("put new hostname")
-                .setView(addhostname)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(IrcClient.this,
-                                EditHost.class);
-                        intent.putExtra("hostname", addhostname.getText()
-                                .toString());
-                        startActivityForResult(intent, SHOW_ADDHOST);
-                    }
-                }).show();
+        
     }
 
     /**

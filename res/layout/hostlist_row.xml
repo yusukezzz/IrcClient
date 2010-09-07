@@ -3,6 +3,6 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_height="wrap_content" android:layout_width="fill_parent">
 <TextView android:id="@+id/TextView01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1"></TextView>
-<Button android:id="@+id/Button01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="connect" android:layout_weight="0"></Button>
-<Button android:id="@+id/Button02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="delete"></Button>
+
+
 </LinearLayout>
