@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -42,13 +43,27 @@ public class HostList extends ListActivity {
         });
     }
     
-    public class HostAdapter extends ArrayAdapter<JSONObject> {
-        private List<JSONObject> items;
+    public class HostAdapter extends ArrayAdapter<HostListItem> {
+        private List<HostListItem> items;
         private LayoutInflater inflater;
-        public HostAdapter(Context context, int resourceId, List<JSONObject> items) {
+        private int resourceId;
+        public HostAdapter(Context context, int resourceId, List<HostListItem> items) {
             super(context, resourceId, items);
             this.items = items;
             this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.resourceId = resourceId;
+        }
+        
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view;
+            if (convertView != null) {
+                view = convertView;
+            } else {
+                view = inflater.inflate(resourceId, null);
+            }
+            HostListItem item = items.get(position);
+            return view;
         }
     }
 }
