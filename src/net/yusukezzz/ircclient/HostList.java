@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class HostList extends ListActivity {
     private ListView hostlist;
@@ -63,6 +64,8 @@ public class HostList extends ListActivity {
                 view = inflater.inflate(resourceId, null);
             }
             HostListItem item = items.get(position);
+            TextView textView = (TextView) view.findViewWithTag("title");
+            textView.setText(item.getTitle());
             return view;
         }
     }
