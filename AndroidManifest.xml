@@ -15,6 +15,7 @@
     
 <activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="EditHost">
 </activity>
+<activity android:name="HostList" android:label="@string/app_name" android:windowSoftInputMode="adjustResize"></activity>
 </application>
     <uses-sdk android:minSdkVersion="4" />
 

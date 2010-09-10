@@ -2,7 +2,7 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_height="wrap_content" android:layout_width="fill_parent">
-<TextView android:id="@+id/TextView01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/hostlist_row_title"></TextView>
 
 
 </LinearLayout>

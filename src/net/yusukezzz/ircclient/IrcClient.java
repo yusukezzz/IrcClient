@@ -59,9 +59,11 @@ public class IrcClient extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
-        boolean exists_hosts = false;
+        boolean exists_hosts = true;
         if (exists_hosts) {
             // TODO: ホストのリストを表示
+            Intent intent = new Intent(IrcClient.this, HostList.class);
+            startActivityForResult(intent, SHOW_HOSTLIST);
         } else {
             // ホスト追加
             // this.addHost();
@@ -111,7 +113,8 @@ public class IrcClient extends Activity {
             case SHOW_ADDHOST:
                 if (resCode == RESULT_OK) {
                     // ホスト一覧へ
-                    setContentView(R.layout.main);
+                    Intent intent = new Intent(IrcClient.this, HostList.class);
+                    startActivityForResult(intent, SHOW_HOSTLIST);
                 }
                 break;
             case SHOW_HOSTLIST:
