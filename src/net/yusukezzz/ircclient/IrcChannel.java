@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class IrcChannel {
-    private String name;
+    private String                             name;
     private ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
 
     public IrcChannel(String ch) {
@@ -13,6 +13,7 @@ public class IrcChannel {
 
     /**
      * チャンネルに所属するユーザーリストを更新
+     *
      * @param names
      * @return
      */
@@ -38,7 +39,7 @@ public class IrcChannel {
 
     public ArrayList<String> getUserNames() {
         ArrayList<String> names = new ArrayList<String>();
-        for (int i=0; i<users.size(); i++) {
+        for (int i = 0; i < users.size(); i++) {
             names.add(users.get(i).get("name"));
         }
         return names;

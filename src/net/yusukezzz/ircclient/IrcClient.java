@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -25,22 +27,22 @@ import android.widget.TextView;
 public class IrcClient extends Activity {
 
     // Activity request code
-    private static final int         SHOW_ADDHOST  = 0;
-    private static final int         SHOW_HOSTLIST = 1;
-    public static final String       HOSTS_FILE    = "hosts.json";
+    private static final int   SHOW_ADDHOST  = 0;
+    private static final int   SHOW_HOSTLIST = 1;
+    public static final String HOSTS_FILE    = "hosts.json";
 
-    private IrcHost                  currentHost;
-    private IrcChannel               currentChannel;
+    private IrcHost            currentHost;
+    private IrcChannel         currentChannel;
 
     // channel view
-    private ScrollView               scroll;
-    private TextView                 recieve;
-    private EditText                 sendtxt;
-    private Button                   postbtn;
+    private ScrollView         scroll;
+    private TextView           recieve;
+    private EditText           sendtxt;
+    private Button             postbtn;
 
-    private Handler                  handler;
-    private IrcHost                  ircHost;
-    private Integer                  Height;
+    private Handler            handler;
+    private IrcHost            ircHost;
+    private Integer            Height;
 
     @Override
     public void onResume() {
@@ -59,7 +61,9 @@ public class IrcClient extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
-        boolean exists_hosts = true;
+        MyJson myjson = new MyJson(getApplicationContext());
+        JSONArray hosts = myjson.readFile(HOSTS_FILE);
+        boolean exists_hosts = (hosts.length() > 0) ? true : false;
         if (exists_hosts) {
             // TODO: ホストのリストを表示
             Intent intent = new Intent(IrcClient.this, HostList.class);
@@ -84,8 +88,7 @@ public class IrcClient extends Activity {
                             toBtm = true;
                         }
                         // 出力
-                        recieve.setText(recieve.getText() + getTime() + " "
-                                + msg.obj.toString() + "\n");
+                        recieve.setText(recieve.getText() + getTime() + " " + msg.obj.toString() + "\n");
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -146,7 +149,7 @@ public class IrcClient extends Activity {
 
     /**
      * hh:mm形式の現在時間文字列を返す
-     * 
+     *
      * @return time hh:mm
      */
     private String getTime() {
@@ -162,12 +165,12 @@ public class IrcClient extends Activity {
     }
 
     public void addHost() {
-        
+
     }
 
     /**
      * channel画面
-     * 
+     *
      * @param ch
      */
     private void renderChannel(String ch) {
@@ -183,8 +186,7 @@ public class IrcClient extends Activity {
             @Override
             public void onClick(View v) {
                 if (v.toString() == "channel") {
-                    IrcClient.this.postText(currentChannel.getName(), sendtxt
-                            .getText().toString());
+                    IrcClient.this.postText(currentChannel.getName(), sendtxt.getText().toString());
                 }
             }
         });

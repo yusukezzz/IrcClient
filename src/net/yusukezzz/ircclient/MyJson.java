@@ -12,11 +12,11 @@ import android.content.Context;
 
 public class MyJson {
     private Context context;
-    
+
     public MyJson(Context context) {
         this.context = context;
     }
-    
+
     public JSONArray readFile(String filename) {
         JSONArray json = null;
         try {
@@ -32,11 +32,10 @@ public class MyJson {
         }
         return json;
     }
-    
+
     public boolean writeFile(String filename, String src) {
         try {
-            FileOutputStream fos = this.context
-                .openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream fos = this.context.openFileOutput(filename, Context.MODE_PRIVATE);
             fos.write(src.getBytes());
             fos.close();
         } catch (FileNotFoundException e) {

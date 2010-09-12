@@ -15,14 +15,14 @@ import android.os.Handler;
 import android.os.Message;
 
 public class IrcHost extends Thread {
-    private String                  HOST;
-    private Integer                 PORT;
-    private String                  NICK;
-    private String                  LOGIN;
-    private String                  CHARSET;
-    private Handler                 handler;
-    private BufferedWriter          bw;
-    private BufferedReader          br;
+    private String                      HOST;
+    private Integer                     PORT;
+    private String                      NICK;
+    private String                      LOGIN;
+    private String                      CHARSET;
+    private Handler                     handler;
+    private BufferedWriter              bw;
+    private BufferedReader              br;
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
@@ -157,9 +157,10 @@ public class IrcHost extends Thread {
         this.write("PRIVMSG " + ch + " " + str + "\n");
         this.sendMsg(ch, "<" + this.NICK + "> " + str);
     }
-    
+
     /**
      * 実際にbufferWriterで書き込むメソッド
+     *
      * @param cmd
      */
     private void write(String cmd) {
