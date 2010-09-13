@@ -9,8 +9,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 
@@ -26,13 +29,19 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, Integer port, String nick, String login, String charset, Handler handler) {
+    public IrcHost(String host, Integer port, String nick, String login, String charset) {
         this.HOST = host;
         this.PORT = port;
         this.NICK = nick;
         this.LOGIN = login;
         this.CHARSET = charset;
-        this.handler = handler;
+        this.handler = IrcClient.getHandler();
+    }
+    
+    /**
+     * ホストに接続する
+     */
+    public void connect() {
         try {
             this.sendMsg("", this.HOST + " connecting...");
             Socket irc = new Socket(this.HOST, this.PORT);
@@ -88,6 +97,10 @@ public class IrcHost extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public String getHostName() {
+        return this.HOST;
     }
 
     /**

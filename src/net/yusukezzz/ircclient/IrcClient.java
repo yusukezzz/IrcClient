@@ -2,13 +2,9 @@ package net.yusukezzz.ircclient;
 
 import java.text.DecimalFormat;
 import java.util.Calendar;
-import java.util.HashMap;
-
 import org.json.JSONArray;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,8 +36,7 @@ public class IrcClient extends Activity {
     private EditText           sendtxt;
     private Button             postbtn;
 
-    private Handler            handler;
-    private IrcHost            ircHost;
+    private static Handler     handler       = null;
     private Integer            Height;
 
     @Override
@@ -60,22 +55,23 @@ public class IrcClient extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        
         // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
         MyJson myjson = new MyJson(getApplicationContext());
         JSONArray hosts = myjson.readFile(HOSTS_FILE);
         boolean exists_hosts = (hosts.length() > 0) ? true : false;
         if (exists_hosts) {
-            // TODO: ホストのリストを表示
+            // ホストのリストを表示
             Intent intent = new Intent(IrcClient.this, HostList.class);
             startActivityForResult(intent, SHOW_HOSTLIST);
         } else {
-            // ホスト追加
-            // this.addHost();
+            // ホスト追加/編集
             Intent intent = new Intent(IrcClient.this, EditHost.class);
             startActivityForResult(intent, SHOW_ADDHOST);
         }
+        
         // 受信したテキストをTextViewに出力するhandler
-        this.handler = new Handler() {
+        IrcClient.handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -88,7 +84,8 @@ public class IrcClient extends Activity {
                             toBtm = true;
                         }
                         // 出力
-                        recieve.setText(recieve.getText() + getTime() + " " + msg.obj.toString() + "\n");
+                        recieve.setText(recieve.getText() + getTime() + " "
+                                + msg.obj.toString() + "\n");
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -130,10 +127,19 @@ public class IrcClient extends Activity {
     }
 
     /**
+     * Handlerを返す
+     * 
+     * @return handler
+     */
+    public static Handler getHandler() {
+        return IrcClient.handler;
+    }
+
+    /**
      * テキストをIRCサーバに送信
      */
     private void postText(String ch, String text) {
-        this.ircHost.privmsg(ch, text);
+        this.currentHost.privmsg(ch, text);
     }
 
     /**
@@ -149,7 +155,7 @@ public class IrcClient extends Activity {
 
     /**
      * hh:mm形式の現在時間文字列を返す
-     *
+     * 
      * @return time hh:mm
      */
     private String getTime() {
@@ -164,13 +170,9 @@ public class IrcClient extends Activity {
         return time;
     }
 
-    public void addHost() {
-
-    }
-
     /**
      * channel画面
-     *
+     * 
      * @param ch
      */
     private void renderChannel(String ch) {
@@ -186,7 +188,8 @@ public class IrcClient extends Activity {
             @Override
             public void onClick(View v) {
                 if (v.toString() == "channel") {
-                    IrcClient.this.postText(currentChannel.getName(), sendtxt.getText().toString());
+                    IrcClient.this.postText(currentChannel.getName(), sendtxt
+                            .getText().toString());
                 }
             }
         });
