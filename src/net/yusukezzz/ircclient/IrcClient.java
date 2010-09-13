@@ -38,6 +38,34 @@ public class IrcClient extends Activity {
 
     private static Handler     handler       = null;
     private Integer            Height;
+    
+    public IrcClient() {
+    	// handler の用意
+        IrcClient.handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case 0:
+                        // 現在のスクロール位置を取得
+                        Integer pos = recieve.getBottom() - scroll.getScrollY();
+                        // 最下行付近チェック
+                        Boolean toBtm = false;
+                        if (pos < Height) {
+                            toBtm = true;
+                        }
+                        // 出力
+                        recieve.setText(recieve.getText() + getTime() + " "
+                                + msg.obj.toString() + "\n");
+                        // 最下行付近なら新規書き込みに追従させる
+                        if (toBtm) {
+                            scrollToBottom();
+                            toBtm = false;
+                        }
+                }
+                super.handleMessage(msg);
+            }
+        };
+    }
 
     @Override
     public void onResume() {
@@ -70,31 +98,6 @@ public class IrcClient extends Activity {
             startActivityForResult(intent, SHOW_ADDHOST);
         }
         
-        // 受信したテキストをTextViewに出力するhandler
-        IrcClient.handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case 0:
-                        // 現在のスクロール位置を取得
-                        Integer pos = recieve.getBottom() - scroll.getScrollY();
-                        // 最下行付近チェック
-                        Boolean toBtm = false;
-                        if (pos < Height) {
-                            toBtm = true;
-                        }
-                        // 出力
-                        recieve.setText(recieve.getText() + getTime() + " "
-                                + msg.obj.toString() + "\n");
-                        // 最下行付近なら新規書き込みに追従させる
-                        if (toBtm) {
-                            scrollToBottom();
-                            toBtm = false;
-                        }
-                }
-                super.handleMessage(msg);
-            }
-        };
         // // 通信開始
         // try {
         // this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
