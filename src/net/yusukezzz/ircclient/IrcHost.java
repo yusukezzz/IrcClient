@@ -26,6 +26,7 @@ public class IrcHost extends Thread {
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
+    private boolean                     connected = false;
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
@@ -55,6 +56,15 @@ public class IrcHost extends Thread {
             e.printStackTrace();
         }
         this.start();
+        this.connected = true;
+    }
+    
+    /**
+     * 接続の状態を返す
+     * @return boolean
+     */
+    public boolean isConnected() {
+        return this.connected;
     }
 
     @Override

@@ -7,9 +7,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,16 +21,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class HostList extends ListActivity {
-    private MyJson    myjson = null;
-    private JSONArray json   = null;
-    private List<IrcHost> hosts = null;
-    
+    private MyJson        myjson = null;
+    private JSONArray     json   = null;
+    private List<IrcHost> hosts  = null;
+
     /**
-     * 文字コードの配列を返す
+     * 文字コードを返す
+     *
      * @return charset[]
      */
-    private String[] getCharsets() {
-        return getResources().getStringArray(R.array.charsets);
+    private String getCharsets(int pos) {
+        String[] charsets = getResources().getStringArray(R.array.charsets);
+        return charsets[pos];
     }
 
     @Override
@@ -44,33 +49,35 @@ public class HostList extends ListActivity {
             JSONObject jsobj;
             try {
                 jsobj = json.getJSONObject(i);
-                hosts.add(new IrcHost(jsobj.getString("name"),
-                        jsobj.getInt("port"),
-                        jsobj.getString("nick"),
-                        jsobj.getString("login"),
-                        getCharsets()[jsobj.getInt("charset")]));
+                hosts.add(new IrcHost(jsobj.getString("name"), jsobj
+                        .getInt("port"), jsobj.getString("nick"), jsobj
+                        .getString("login"), getCharsets(jsobj
+                        .getInt("charset"))));
             } catch (JSONException e) {
             }
         }
         // アダプターにセット
-        HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
+        HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row,
+                hosts);
         setListAdapter(adapter);
     }
-    
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        // 接続、編集、削除ダイアログ表示
+        // TODO: Listダイアログで操作を表示
+        //AlertDialog.Builder al
     }
 
     public class HostAdapter extends ArrayAdapter<IrcHost> {
-        private List<IrcHost> items;
-        private LayoutInflater     inflater;
+        private List<IrcHost>  items;
+        private LayoutInflater inflater;
 
         public HostAdapter(Context context, int resourceId, List<IrcHost> items) {
             super(context, resourceId, items);
             this.items = items;
-            this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -81,9 +88,9 @@ public class HostList extends ListActivity {
                 view = inflater.inflate(R.layout.hostlist_row, null);
             }
             IrcHost host = items.get(position);
-            TextView textView = (TextView) view.findViewById(R.id.hostlist_row_title);
+            TextView textView = (TextView) view
+                    .findViewById(R.id.hostlist_row_title);
             textView.setText(host.getHostName());
-            // TODO: 接続、編集、削除などのボタン用意
             return view;
         }
     }
