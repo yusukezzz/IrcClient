@@ -66,7 +66,8 @@ public class HostList extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         // TODO: Listダイアログで操作を表示
-        //AlertDialog.Builder al
+        AlertDialog.Builder ad = new AlertDialog.Builder(getApplicationContext());
+        ad.setTitle("do");
     }
 
     public class HostAdapter extends ArrayAdapter<IrcHost> {
