@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,7 +28,7 @@ public class HostList extends ListActivity {
 
     /**
      * 文字コードを返す
-     *
+     * 
      * @return charset[]
      */
     private String getCharsets(int pos) {
@@ -49,25 +50,42 @@ public class HostList extends ListActivity {
             JSONObject jsobj;
             try {
                 jsobj = json.getJSONObject(i);
-                hosts.add(new IrcHost(jsobj.getString("name"), jsobj
-                        .getInt("port"), jsobj.getString("nick"), jsobj
-                        .getString("login"), getCharsets(jsobj
+                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
+                        .getString("nick"), jsobj.getString("login"), getCharsets(jsobj
                         .getInt("charset"))));
             } catch (JSONException e) {
             }
         }
         // アダプターにセット
-        HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row,
-                hosts);
+        HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
         setListAdapter(adapter);
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        
+        final int host_no = position;
         // TODO: Listダイアログで操作を表示
-        AlertDialog.Builder ad = new AlertDialog.Builder(getApplicationContext());
+        final AlertDialog.Builder ad = new AlertDialog.Builder(HostList.this);
+        final CharSequence[] menus = {"connect", "edit", "delete"};
         ad.setTitle("do");
+        ad.setItems(menus, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 1:
+                        Intent i = new Intent(HostList.this, EditHost.class);
+                        i.putExtra("host_no", host_no);
+                        startActivity(i);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+        ad.create().show();
     }
 
     public class HostAdapter extends ArrayAdapter<IrcHost> {
@@ -89,8 +107,7 @@ public class HostList extends ListActivity {
                 view = inflater.inflate(R.layout.hostlist_row, null);
             }
             IrcHost host = items.get(position);
-            TextView textView = (TextView) view
-                    .findViewById(R.id.hostlist_row_title);
+            TextView textView = (TextView) view.findViewById(R.id.hostlist_row_title);
             textView.setText(host.getHostName());
             return view;
         }
