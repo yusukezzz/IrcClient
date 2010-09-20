@@ -9,11 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 
@@ -23,31 +19,31 @@ public class IrcHost extends Thread {
     private String                      NICK;
     private String                      LOGIN;
     private String                      CHARSET;
+    private Socket                      socket   = null;
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
-    private boolean                     connected = false;
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
     public IrcHost(String host, Integer port, String nick, String login, String charset) {
-        this.HOST = host;
-        this.PORT = port;
-        this.NICK = nick;
-        this.LOGIN = login;
-        this.CHARSET = charset;
-        this.handler = IrcClient.getHandler();
+        HOST = host;
+        PORT = port;
+        NICK = nick;
+        LOGIN = login;
+        CHARSET = charset;
+        handler = IrcClient.getHandler();
     }
-    
+
     /**
      * ホストに接続する
      */
     public void connect() {
         try {
             this.sendMsg("", this.HOST + " connecting...");
-            Socket irc = new Socket(this.HOST, this.PORT);
-            this.bw = new BufferedWriter(new OutputStreamWriter(irc.getOutputStream()));
-            this.br = new BufferedReader(new InputStreamReader(irc.getInputStream(), this.CHARSET));// とりあえず文字コード決め打ち
+            socket = new Socket(this.HOST, this.PORT);
+            bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -56,15 +52,20 @@ public class IrcHost extends Thread {
             e.printStackTrace();
         }
         this.start();
-        this.connected = true;
     }
-    
+
     /**
-     * 接続の状態を返す
-     * @return boolean
+     * ホストから切断する
      */
-    public boolean isConnected() {
-        return this.connected;
+    public void close() {
+        if (socket != null) {
+            try {
+                // TODO: send leave msg
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -72,7 +73,7 @@ public class IrcHost extends Thread {
         try {
             // 1行ずつ処理
             String current = null;
-            while ((current = this.br.readLine()) != null) {
+            while ((current = br.readLine()) != null) {
                 // IRCサーバからの応答を識別する
                 IrcReply reply = new IrcReply(current);
                 int reply_id = reply.parse();
@@ -108,9 +109,27 @@ public class IrcHost extends Thread {
             e.printStackTrace();
         }
     }
-    
+
+    /**
+     * 接続の状態を返す
+     *
+     * @return boolean
+     */
+    public boolean isConnected() {
+        if (socket == null) {
+            return false;
+        } else {
+            return socket.isConnected();
+        }
+    }
+
+    /**
+     * ホスト名を返す
+     *
+     * @return String
+     */
     public String getHostName() {
-        return this.HOST;
+        return HOST;
     }
 
     /**
@@ -178,7 +197,7 @@ public class IrcHost extends Thread {
      */
     public void privmsg(String ch, String str) {
         this.write("PRIVMSG " + ch + " " + str + "\n");
-        this.sendMsg(ch, "<" + this.NICK + "> " + str);
+        this.sendMsg(ch, "<" + NICK + "> " + str);
     }
 
     /**
@@ -188,8 +207,8 @@ public class IrcHost extends Thread {
      */
     private void write(String cmd) {
         try {
-            this.bw.write(cmd);
-            this.bw.flush();
+            bw.write(cmd);
+            bw.flush();
         } catch (IOException e) {
             // TODO: handle exception
         }
@@ -206,6 +225,6 @@ public class IrcHost extends Thread {
         msg = new Message();
         msg.obj = text;
         msg.what = 0;
-        IrcHost.this.handler.sendMessage(msg);
+        handler.sendMessage(msg);
     }
 }

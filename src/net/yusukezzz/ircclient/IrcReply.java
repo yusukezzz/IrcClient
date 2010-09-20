@@ -7,7 +7,7 @@ public class IrcReply {
     // 識別対象リプライ
     private String          reply          = "";
     // 識別結果の配列
-    private String[]        results;
+    private String[]        results        = {};
 
     // IRCリプライの内部ID
     public static final int RID_UNKNOWN    = 300;

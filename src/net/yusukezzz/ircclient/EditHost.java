@@ -57,6 +57,7 @@ public class EditHost extends Activity {
                 login.setText(host.get("login").toString(), BufferType.NORMAL);
                 charspn.setSelection(host.getInt("charset"));
             } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
@@ -82,7 +83,7 @@ public class EditHost extends Activity {
                     // 書き込み
                     myjson.writeFile(IrcClient.HOSTS_FILE, json.toString());
                 } catch (JSONException e) {
-                    Log.e("yusukezzz", e.getMessage().toString());
+                    e.printStackTrace();
                 }
                 myjson = null;
                 setResult(RESULT_OK);
