@@ -72,7 +72,7 @@ public class HostList extends ListActivity {
         // ダイアログで操作を表示
         final AlertDialog.Builder ad = new AlertDialog.Builder(HostList.this);
         final CharSequence[] menus = { "connect", "edit", "delete" };
-        ad.setTitle("do");
+        ad.setTitle("Action");
         ad.setItems(menus, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

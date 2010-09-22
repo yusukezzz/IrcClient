@@ -5,7 +5,8 @@ import java.util.HashMap;
 
 public class IrcChannel {
     private String                             name;
-    private ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
+    private ArrayList<HashMap<String, String>> users   = new ArrayList<HashMap<String, String>>();
+    private String                             recieve = "";
 
     public IrcChannel(String ch) {
         this.setName(ch);
@@ -13,7 +14,7 @@ public class IrcChannel {
 
     /**
      * チャンネルに所属するユーザーリストを更新
-     *
+     * 
      * @param names
      * @return
      */
@@ -51,5 +52,9 @@ public class IrcChannel {
 
     public String getName() {
         return name;
+    }
+
+    public void addRecieve(String text) {
+        recieve += text;
     }
 }

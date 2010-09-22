@@ -23,6 +23,7 @@ public class IrcHost extends Thread {
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
+    private String                      receive  = "";
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
@@ -112,7 +113,7 @@ public class IrcHost extends Thread {
 
     /**
      * 接続の状態を返す
-     *
+     * 
      * @return boolean
      */
     public boolean isConnected() {
@@ -125,7 +126,7 @@ public class IrcHost extends Thread {
 
     /**
      * ホスト名を返す
-     *
+     * 
      * @return String
      */
     public String getHostName() {
@@ -134,7 +135,7 @@ public class IrcHost extends Thread {
 
     /**
      * ping に返信
-     *
+     * 
      * @param daemon
      */
     public void pong(String daemon) {
@@ -143,7 +144,7 @@ public class IrcHost extends Thread {
 
     /**
      * ニックネームを変更する
-     *
+     * 
      * @param nick
      */
     public void nick(String nick) {
@@ -152,7 +153,7 @@ public class IrcHost extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
-     *
+     * 
      * @param user
      * @param hostname
      * @param server
@@ -169,7 +170,7 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに参加する
-     *
+     * 
      * @param ch
      */
     public void join(String ch) {
@@ -182,7 +183,7 @@ public class IrcHost extends Thread {
 
     /**
      * ユーザーリストを要求する
-     *
+     * 
      * @param ch
      */
     public void names(String ch) {
@@ -191,7 +192,7 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに発言する
-     *
+     * 
      * @param ch
      * @param str
      */
@@ -202,7 +203,7 @@ public class IrcHost extends Thread {
 
     /**
      * 実際にbufferWriterで書き込むメソッド
-     *
+     * 
      * @param cmd
      */
     private void write(String cmd) {
@@ -216,14 +217,20 @@ public class IrcHost extends Thread {
 
     /**
      * handlerにテキストを送る
-     *
+     * 
      * @param ch
      * @param text
      */
     private void sendMsg(String ch, String text) {
+        IrcChannel channel = channels.get(ch);
+        if (channel == null) {
+            receive += text;
+        } else {
+            channel.addRecieve(text);
+        }
         Message msg;
         msg = new Message();
-        msg.obj = text;
+        msg.obj = HOST + "#" + ch;
         msg.what = 0;
         handler.sendMessage(msg);
     }
