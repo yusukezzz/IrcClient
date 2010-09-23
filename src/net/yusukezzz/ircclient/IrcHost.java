@@ -23,6 +23,7 @@ public class IrcHost extends Thread {
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
+    // ch指定のないテキストを格納
     private String                      receive  = "";
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
@@ -53,6 +54,8 @@ public class IrcHost extends Thread {
             e.printStackTrace();
         }
         this.start();
+        this.nick();
+        this.user();
     }
 
     /**
@@ -72,7 +75,7 @@ public class IrcHost extends Thread {
     @Override
     public void run() {
         try {
-            // 1行ずつ処理
+            // 受信したメッセージを処理
             String current = null;
             while ((current = br.readLine()) != null) {
                 // IRCサーバからの応答を識別する
@@ -141,13 +144,17 @@ public class IrcHost extends Thread {
     public void pong(String daemon) {
         this.write("PONG " + daemon + "\n");
     }
+    
+    public void nick() {
+    	this.write("NICK " + NICK + "\n");
+    }
 
     /**
      * ニックネームを変更する
      * 
      * @param nick
      */
-    public void nick(String nick) {
+    public void changeNick(String nick) {
         this.write("NICK " + nick + "\n");
     }
 
@@ -211,7 +218,6 @@ public class IrcHost extends Thread {
             bw.write(cmd);
             bw.flush();
         } catch (IOException e) {
-            // TODO: handle exception
         }
     }
 

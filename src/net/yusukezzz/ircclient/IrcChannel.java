@@ -57,4 +57,8 @@ public class IrcChannel {
     public void addRecieve(String text) {
         recieve += text;
     }
+    
+    public String getRecieve() {
+    	return recieve;
+    }
 }

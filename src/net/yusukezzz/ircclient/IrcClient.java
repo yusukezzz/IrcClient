@@ -5,11 +5,13 @@ import java.util.Calendar;
 import org.json.JSONArray;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,8 +29,8 @@ public class IrcClient extends Activity {
     private static final int   SHOW_HOSTLIST = 1;
     public static final String HOSTS_FILE    = "hosts.json";
 
-    private IrcHost            currentHost;
-    private IrcChannel         currentChannel;
+    private static IrcHost            currentHost = null;
+    private static IrcChannel         currentChannel = null;
 
     // channel view
     private ScrollView         scroll;
@@ -65,6 +67,7 @@ public class IrcClient extends Activity {
                 super.handleMessage(msg);
             }
         };
+        Log.e("IRC", "start");
     }
 
     @Override
@@ -97,17 +100,6 @@ public class IrcClient extends Activity {
             Intent intent = new Intent(IrcClient.this, EditHost.class);
             startActivityForResult(intent, SHOW_ADDHOST);
         }
-        
-        // // 通信開始
-        // try {
-        // this.ircHost = new IrcHost(this.HOST, this.PORT, this.NICK,
-        // this.CHARSET, this.handler);
-        // this.ircHost.nick(NICK);
-        // this.ircHost.user();
-        // this.ircHost.join(CHANNEL);
-        // } catch (Exception e) {
-        // recieve.setText(e.getMessage());
-        // }
     }
 
     @Override
@@ -122,11 +114,25 @@ public class IrcClient extends Activity {
                 break;
             case SHOW_HOSTLIST:
                 if (resCode == RESULT_OK) {
-                    // default
+                    if (currentHost != null) {
+                    	this.renderChannel("");
+                    }
                 }
             default:
                 break;
         }
+    }
+    
+    /**
+     * 表示に使用するホストを設定する
+     * @param host
+     */
+    public static void setCurrentHost(IrcHost host) {
+    	currentHost = host;
+    }
+    
+    public void setCurrentChannel(IrcChannel ch) {
+    	currentChannel = ch;
     }
 
     /**
@@ -141,8 +147,10 @@ public class IrcClient extends Activity {
     /**
      * テキストをIRCサーバに送信
      */
-    private void postText(String ch, String text) {
-        this.currentHost.privmsg(ch, text);
+    private void postText(String text) {
+    	if (currentHost != null && currentChannel != null) {
+    		currentHost.privmsg(currentChannel.getName(), text);
+    	}
     }
 
     /**
@@ -191,8 +199,7 @@ public class IrcClient extends Activity {
             @Override
             public void onClick(View v) {
                 if (v.toString() == "channel") {
-                    IrcClient.this.postText(currentChannel.getName(), sendtxt
-                            .getText().toString());
+                    IrcClient.this.postText(sendtxt.getText().toString());
                 }
             }
         });
