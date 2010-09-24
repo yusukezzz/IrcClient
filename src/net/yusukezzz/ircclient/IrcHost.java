@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class IrcHost extends Thread {
     private String                      HOST;
@@ -135,6 +136,20 @@ public class IrcHost extends Thread {
     public String getHostName() {
         return HOST;
     }
+    
+    public String getRecieve() {
+        return receive;
+    }
+
+    /**
+     * 指定したチャンネルのオブジェクトを返す
+     * 
+     * @param name
+     * @return IrcChannel
+     */
+    public IrcChannel getChannel(String name) {
+        return channels.get(name);
+    }
 
     /**
      * ping に返信
@@ -144,9 +159,9 @@ public class IrcHost extends Thread {
     public void pong(String daemon) {
         this.write("PONG " + daemon + "\n");
     }
-    
+
     public void nick() {
-    	this.write("NICK " + NICK + "\n");
+        this.write("NICK " + NICK + "\n");
     }
 
     /**
@@ -181,7 +196,7 @@ public class IrcHost extends Thread {
      * @param ch
      */
     public void join(String ch) {
-        this.write("JOIN " + ch + "\n");
+        this.write("JOIN #" + ch + "\n");
         // チャンネルの追加
         channels.put(ch, new IrcChannel(ch));
         // メンバーの取得
@@ -222,7 +237,7 @@ public class IrcHost extends Thread {
     }
 
     /**
-     * handlerにテキストを送る
+     * 受信テキストを更新し、handlerに描画指示を送る
      * 
      * @param ch
      * @param text
@@ -230,14 +245,15 @@ public class IrcHost extends Thread {
     private void sendMsg(String ch, String text) {
         IrcChannel channel = channels.get(ch);
         if (channel == null) {
-            receive += text;
+            receive += Util.getTime() + " " + text + "\n";
         } else {
             channel.addRecieve(text);
         }
         Message msg;
         msg = new Message();
-        msg.obj = HOST + "#" + ch;
+        msg.obj = HOST + ch; // example.com#hogech
         msg.what = 0;
         handler.sendMessage(msg);
+        Log.e("IRC", text);
     }
 }

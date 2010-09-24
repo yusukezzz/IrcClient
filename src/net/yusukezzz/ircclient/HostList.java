@@ -26,10 +26,6 @@ public class HostList extends ListActivity {
 	private JSONArray json = null;
 	private List<IrcHost> hosts = null;
 
-	public HostList() {
-		myjson = new MyJson(getApplicationContext());
-	}
-
 	/**
 	 * 文字コードを返す
 	 * 
@@ -46,6 +42,7 @@ public class HostList extends ListActivity {
 		setContentView(R.layout.hostlist);
 
 		// host設定の取り出しと設定
+		myjson = new MyJson(getApplicationContext());
 		json = myjson.readFile(IrcClient.HOSTS_FILE);
 		hosts = new ArrayList<IrcHost>();
 		int host_num = json.length();
@@ -86,7 +83,9 @@ public class HostList extends ListActivity {
 						host.close();
 					} else {
 						host.connect();
+						host.join("yusukezzz_test");
 						IrcClient.setCurrentHost(host);
+						IrcClient.setCurrentChannel(host.getChannel("yusukezzz_test"));
 						setResult(RESULT_OK);
 						finish();
 					}

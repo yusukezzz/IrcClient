@@ -55,7 +55,7 @@ public class IrcChannel {
     }
 
     public void addRecieve(String text) {
-        recieve += text;
+        recieve += Util.getTime() + " " + text + "\n";
     }
     
     public String getRecieve() {

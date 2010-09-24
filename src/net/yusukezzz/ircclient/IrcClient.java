@@ -1,11 +1,8 @@
 package net.yusukezzz.ircclient;
 
-import java.text.DecimalFormat;
-import java.util.Calendar;
 import org.json.JSONArray;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,12 +22,12 @@ import android.widget.TextView;
 public class IrcClient extends Activity {
 
     // Activity request code
-    private static final int   SHOW_ADDHOST  = 0;
-    private static final int   SHOW_HOSTLIST = 1;
-    public static final String HOSTS_FILE    = "hosts.json";
+    private static final int   SHOW_ADDHOST   = 0;
+    private static final int   SHOW_HOSTLIST  = 1;
+    public static final String HOSTS_FILE     = "hosts.json";
 
-    private static IrcHost            currentHost = null;
-    private static IrcChannel         currentChannel = null;
+    private static IrcHost     currentHost    = null;
+    private static IrcChannel  currentChannel = null;
 
     // channel view
     private ScrollView         scroll;
@@ -38,37 +35,8 @@ public class IrcClient extends Activity {
     private EditText           sendtxt;
     private Button             postbtn;
 
-    private static Handler     handler       = null;
+    private static Handler     handler        = null;
     private Integer            Height;
-    
-    public IrcClient() {
-    	// handler の用意
-        IrcClient.handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case 0:
-                        // 現在のスクロール位置を取得
-                        Integer pos = recieve.getBottom() - scroll.getScrollY();
-                        // 最下行付近チェック
-                        Boolean toBtm = false;
-                        if (pos < Height) {
-                            toBtm = true;
-                        }
-                        // 出力
-                        recieve.setText(recieve.getText() + getTime() + " "
-                                + msg.obj.toString() + "\n");
-                        // 最下行付近なら新規書き込みに追従させる
-                        if (toBtm) {
-                            scrollToBottom();
-                            toBtm = false;
-                        }
-                }
-                super.handleMessage(msg);
-            }
-        };
-        Log.e("IRC", "start");
-    }
 
     @Override
     public void onResume() {
@@ -86,7 +54,44 @@ public class IrcClient extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
+
+        // handler の用意
+        IrcClient.handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case 0:
+                        // 現在のスクロール位置を取得
+                        Integer pos = recieve.getBottom() - scroll.getScrollY();
+                        // 最下行付近チェック
+                        Boolean toBtm = false;
+                        if (pos < Height) {
+                            toBtm = true;
+                        }
+                        String[] arr = msg.obj.toString().split("#");
+                        Log.e("IRC", msg.obj.toString());
+                        Log.e("IRC", getLocalClassName() + " " + currentHost.getHostName() + "#" + currentChannel.getName());
+                        if (currentHost.getName() == arr[0] &&
+                                currentChannel.getName() == arr[1]) {
+                            // 出力
+                            String str = currentChannel.getName() == "" ? currentHost.getRecieve() : currentChannel.getRecieve();
+                            recieve.setText(str);
+                        }
+                        
+                        // 最下行付近なら新規書き込みに追従させる
+                        if (toBtm) {
+                            scrollToBottom();
+                            toBtm = false;
+                        }
+                        break;
+                }
+                super.handleMessage(msg);
+            }
+        };
+        // とりあえず空のチャンネルを描画
+        this.renderChannel();
+        Log.e("IRC", "start");
+
         // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
         MyJson myjson = new MyJson(getApplicationContext());
         JSONArray hosts = myjson.readFile(HOSTS_FILE);
@@ -115,24 +120,30 @@ public class IrcClient extends Activity {
             case SHOW_HOSTLIST:
                 if (resCode == RESULT_OK) {
                     if (currentHost != null) {
-                    	this.renderChannel("");
+                        //this.renderChannel();
                     }
                 }
             default:
                 break;
         }
     }
-    
+
     /**
      * 表示に使用するホストを設定する
+     * 
      * @param host
      */
     public static void setCurrentHost(IrcHost host) {
-    	currentHost = host;
+        currentHost = host;
     }
-    
-    public void setCurrentChannel(IrcChannel ch) {
-    	currentChannel = ch;
+
+    /**
+     * 表示に使用するチャンネルを設定する
+     * 
+     * @param ch
+     */
+    public static void setCurrentChannel(IrcChannel ch) {
+        currentChannel = ch;
     }
 
     /**
@@ -148,9 +159,9 @@ public class IrcClient extends Activity {
      * テキストをIRCサーバに送信
      */
     private void postText(String text) {
-    	if (currentHost != null && currentChannel != null) {
-    		currentHost.privmsg(currentChannel.getName(), text);
-    	}
+        if (currentHost != null && currentChannel != null) {
+            currentHost.privmsg(currentChannel.getName(), text);
+        }
     }
 
     /**
@@ -165,28 +176,11 @@ public class IrcClient extends Activity {
     }
 
     /**
-     * hh:mm形式の現在時間文字列を返す
-     * 
-     * @return time hh:mm
-     */
-    private String getTime() {
-        // 2桁で表示するため
-        DecimalFormat df = new DecimalFormat();
-        df.applyLocalizedPattern("00");
-        // 現在時刻の取得
-        Calendar now = Calendar.getInstance();
-        int h = now.get(Calendar.HOUR_OF_DAY);
-        int m = now.get(Calendar.MINUTE);
-        String time = df.format(h) + ":" + df.format(m);
-        return time;
-    }
-
-    /**
      * channel画面
      * 
      * @param ch
      */
-    private void renderChannel(String ch) {
+    public void renderChannel() {
         // レイアウトをchannel画面に
         setContentView(R.layout.main);
         // channelの部品準備
