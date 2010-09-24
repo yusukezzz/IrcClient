@@ -68,16 +68,13 @@ public class IrcClient extends Activity {
                         if (pos < Height) {
                             toBtm = true;
                         }
-                        String[] arr = msg.obj.toString().split("#");
-                        Log.e("IRC", msg.obj.toString());
-                        Log.e("IRC", getLocalClassName() + " " + currentHost.getHostName() + "#" + currentChannel.getName());
-                        if (currentHost.getName() == arr[0] &&
-                                currentChannel.getName() == arr[1]) {
+                        //String[] arr = msg.obj.toString().split("#");
+                        if (currentHost != null && currentChannel != null) {
                             // 出力
-                            String str = currentChannel.getName() == "" ? currentHost.getRecieve() : currentChannel.getRecieve();
+                            String str = currentChannel.getRecieve();
                             recieve.setText(str);
                         }
-                        
+
                         // 最下行付近なら新規書き込みに追従させる
                         if (toBtm) {
                             scrollToBottom();
@@ -120,7 +117,7 @@ public class IrcClient extends Activity {
             case SHOW_HOSTLIST:
                 if (resCode == RESULT_OK) {
                     if (currentHost != null) {
-                        //this.renderChannel();
+                        // this.renderChannel();
                     }
                 }
             default:

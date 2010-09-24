@@ -244,9 +244,12 @@ public class IrcHost extends Thread {
      */
     private void sendMsg(String ch, String text) {
         IrcChannel channel = channels.get(ch);
+        Log.e("IRC", "ch:" + ch);
         if (channel == null) {
+            Log.e("IRC", "host recieve");
             receive += Util.getTime() + " " + text + "\n";
         } else {
+            Log.e("IRC", "channel recieve");
             channel.addRecieve(text);
         }
         Message msg;
@@ -254,6 +257,5 @@ public class IrcHost extends Thread {
         msg.obj = HOST + ch; // example.com#hogech
         msg.what = 0;
         handler.sendMessage(msg);
-        Log.e("IRC", text);
     }
 }
