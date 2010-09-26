@@ -74,7 +74,7 @@ public class IrcClient extends Activity {
 				super.handleMessage(msg);
 			}
 		};
-		Log.e("IRC", "start");
+		Log.d("IRC", "start");
 
 		// 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
 		MyJson myjson = new MyJson(getApplicationContext());
@@ -107,6 +107,7 @@ public class IrcClient extends Activity {
 					// this.renderChannel();
 				}
 			}
+			break;
 		default:
 			break;
 		}
