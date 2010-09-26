@@ -196,7 +196,7 @@ public class IrcHost extends Thread {
      * @param ch
      */
     public void join(String ch) {
-        this.write("JOIN #" + ch + "\n");
+        this.write("JOIN " + ch + "\n");
         // チャンネルの追加
         channels.put(ch, new IrcChannel(ch));
         // メンバーの取得
@@ -210,6 +210,14 @@ public class IrcHost extends Thread {
      */
     public void names(String ch) {
         this.write("NAMES " + ch + "\n");
+    }
+    
+    /**
+     * 退室メッセージ
+     * @param ch
+     */
+    public void leave(String ch) {
+    	this.write("");
     }
 
     /**
@@ -252,8 +260,7 @@ public class IrcHost extends Thread {
             Log.e("IRC", "channel recieve");
             channel.addRecieve(text);
         }
-        Message msg;
-        msg = new Message();
+        Message msg = new Message();
         msg.obj = HOST + ch; // example.com#hogech
         msg.what = 0;
         handler.sendMessage(msg);

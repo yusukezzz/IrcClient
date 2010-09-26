@@ -83,9 +83,9 @@ public class HostList extends ListActivity {
 						host.close();
 					} else {
 						host.connect();
-						host.join("yusukezzz_test");
+						host.join("#yusukezzz_test");
 						IrcClient.setCurrentHost(host);
-						IrcClient.setCurrentChannel(host.getChannel("yusukezzz_test"));
+						IrcClient.setCurrentChannel(host.getChannel("#yusukezzz_test"));
 						setResult(RESULT_OK);
 						finish();
 					}
