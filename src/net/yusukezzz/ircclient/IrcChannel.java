@@ -16,7 +16,7 @@ public class IrcChannel {
      * チャンネルに所属するユーザーリストを更新
      * 
      * @param names
-     * @return
+     * @return bool
      */
     public boolean updateUserList(String names) {
         // userリストを初期化
@@ -38,6 +38,11 @@ public class IrcChannel {
         return users.size();
     }
 
+    /**
+     * ユーザーの名前一覧をListで返す
+     * 
+     * @return names
+     */
     public ArrayList<String> getUserNames() {
         ArrayList<String> names = new ArrayList<String>();
         for (int i = 0; i < users.size(); i++) {
@@ -46,19 +51,39 @@ public class IrcChannel {
         return names;
     }
 
+    /**
+     * チャンネルの名前を設定する
+     * 
+     * @param channel name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * チャンネルの名前を返す
+     * 
+     * @return channel name
+     */
     public String getName() {
         return name;
     }
 
-    public void addRecieve(String text) {
-        recieve += Util.getTime() + " " + text + "\n";
+    /**
+     * 受信テキストに追加する
+     * 
+     * @param line
+     */
+    public void addRecieve(String line) {
+        recieve += line;
     }
-    
+
+    /**
+     * 受信テキストを返す
+     * 
+     * @return recieve
+     */
     public String getRecieve() {
-    	return recieve;
+        return recieve;
     }
 }

@@ -1,4 +1,5 @@
 package net.yusukezzz.ircclient;
+
 import java.text.DecimalFormat;
 import java.util.Calendar;
 

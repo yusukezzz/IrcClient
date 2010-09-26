@@ -136,7 +136,7 @@ public class IrcHost extends Thread {
     public String getHostName() {
         return HOST;
     }
-    
+
     public String getRecieve() {
         return receive;
     }
@@ -211,13 +211,14 @@ public class IrcHost extends Thread {
     public void names(String ch) {
         this.write("NAMES " + ch + "\n");
     }
-    
+
     /**
      * 退室メッセージ
+     * 
      * @param ch
      */
     public void leave(String ch) {
-    	this.write("");
+        this.write("");
     }
 
     /**
@@ -251,12 +252,14 @@ public class IrcHost extends Thread {
      * @param text
      */
     private void sendMsg(String ch, String text) {
+        String line = Util.getTime() + " " + text + "\n";
         IrcChannel channel = channels.get(ch);
         Log.d("IRC", "ch:" + ch);
         if (channel == null) {
-            receive += Util.getTime() + " " + text + "\n";
+            Log.d("IRC", "host recieve");
+            receive += line;
         } else {
-            channel.addRecieve(text);
+            channel.addRecieve(line);
         }
         Message msg = new Message();
         msg.obj = HOST + ch; // example.com#hogech
