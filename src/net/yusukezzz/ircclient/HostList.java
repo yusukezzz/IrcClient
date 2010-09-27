@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,9 +80,6 @@ public class HostList extends ListActivity {
                             host.close();
                         } else {
                             host.connect();
-                            host.join("#yusukezzz_test");
-                            IrcClient.setCurrentHost(host);
-                            IrcClient.setCurrentChannel(host.getChannel("#yusukezzz_test"));
                             setResult(RESULT_OK);
                             finish();
                         }
@@ -126,6 +122,9 @@ public class HostList extends ListActivity {
         }
     }
 
+    /**
+     * HostListに詰められるデータ
+     */
     public class HostAdapter extends ArrayAdapter<IrcHost> {
         private List<IrcHost>  hosts;
         private LayoutInflater inflater;

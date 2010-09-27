@@ -4,5 +4,6 @@
 <string name="app_name">IrcClient</string>
 <string-array name="charsets"><item>ISO-2022-JP</item>
 <item>UTF-8</item>
+<item>EUC-JP</item>
 </string-array>
 </resources>

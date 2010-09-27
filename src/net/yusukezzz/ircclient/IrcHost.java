@@ -101,7 +101,7 @@ public class IrcHost extends Thread {
                             this.sendMsg(res[1], " * names " + res[2]);
                             break;
                         default:
-                            // this.sendMsg("", current);
+                            this.sendMsg("", current);
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {
