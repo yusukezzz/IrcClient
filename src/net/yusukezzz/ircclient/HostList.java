@@ -106,6 +106,7 @@ public class HostList extends ListActivity {
         }
         menu.add(Menu.NONE, MENU_EDITHOST, Menu.NONE, "edit");
         menu.add(Menu.NONE, MENU_REMOVEHOST, Menu.NONE, "remove");
+        menu.setHeaderTitle("Action");
     }
     
     /**
