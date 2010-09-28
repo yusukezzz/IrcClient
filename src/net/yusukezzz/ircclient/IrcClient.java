@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -16,21 +18,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
+    // Menu item ID
+    private static final int  MENU_ID_HOSTS  = (Menu.FIRST + 1);
+    private static final int  MENU_ID_JOIN   = (Menu.FIRST + 2);
 
-    // Activity request code
-    private static final int   SHOW_ADDHOST   = 0;
-    private static final int   SHOW_HOSTLIST  = 1;
-    public static final String HOSTS_FILE     = "hosts.json";
 
-    private static IrcHost     currentHost    = null;
-    private static IrcChannel  currentChannel = null;
+    private static IrcHost    currentHost    = null;
+    private static IrcChannel currentChannel = null;
 
     // channel view
-    private TextView           recieve;
-    private EditText           sendtxt;
-    private Button             postbtn;
+    private TextView          recieve;
+    private EditText          sendtxt;
+    private Button            postbtn;
 
-    private static Handler     handler        = null;
+    private static Handler    handler        = null;
 
     @Override
     public void onResume() {
@@ -74,43 +75,31 @@ public class IrcClient extends Activity {
                 super.handleMessage(msg);
             }
         };
-        Log.d("IRC", "start");
+    }
 
-        // 登録済みホストがあればホスト一覧へ なければホスト追加画面へ
-        MyJson myjson = new MyJson(getApplicationContext());
-        JSONArray hosts = myjson.readFile(HOSTS_FILE);
-        boolean exists_hosts = (hosts.length() > 0) ? true : false;
-        if (exists_hosts) {
-            // ホストのリストを表示
-            Intent intent = new Intent(IrcClient.this, HostList.class);
-            startActivityForResult(intent, SHOW_HOSTLIST);
-        } else {
-            // ホスト追加/編集
-            Intent intent = new Intent(IrcClient.this, EditHost.class);
-            startActivityForResult(intent, SHOW_ADDHOST);
-        }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, MENU_ID_HOSTS, Menu.NONE, "hosts");
+        menu.add(Menu.NONE, MENU_ID_JOIN, Menu.NONE, "join");
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    protected void onActivityResult(int reqCode, int resCode, Intent data) {
-        switch (reqCode) {
-            case SHOW_ADDHOST:
-                if (resCode == RESULT_OK) {
-                    // ホスト一覧へ
-                    Intent intent = new Intent(IrcClient.this, HostList.class);
-                    startActivityForResult(intent, SHOW_HOSTLIST);
-                }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_ID_HOSTS:
+                // ホストのリストを表示
+                Intent intent = new Intent(IrcClient.this, HostList.class);
+                startActivityForResult(intent, HostList.SHOW_HOSTRECIEVE);
                 break;
-            case SHOW_HOSTLIST:
-                if (resCode == RESULT_OK) {
-                    if (currentHost != null) {
-                        // this.renderChannel();
-                    }
-                }
+            case MENU_ID_JOIN:
+                // join dialog
                 break;
             default:
                 break;
         }
+        return true;
     }
 
     /**

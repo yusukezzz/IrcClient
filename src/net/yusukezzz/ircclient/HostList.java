@@ -13,17 +13,36 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class HostList extends ListActivity {
-    private MyJson        myjson = null;
-    private JSONArray     json   = null;
-    private List<IrcHost> hosts  = null;
+    public static final String HOSTS_FILE       = "hosts.json";
+    private MyJson             myjson           = null;
+    private JSONArray          json             = null;
+    private List<IrcHost>      hosts            = null;
+
+    // Context Menu Items id
+    private static final int   MENU_CONNECT     = Menu.FIRST;
+    private static final int   MENU_DISCONNECT  = Menu.FIRST + 1;
+    private static final int   MENU_EDITHOST    = Menu.FIRST + 2;
+    private static final int   MENU_REMOVEHOST  = Menu.FIRST + 3;
+
+    // Activity request code
+    public static final int    SHOW_EDITHOST    = 0;
+    public static final int    SHOW_HOSTRECIEVE = 1;
 
     /**
      * 文字コードを返す
@@ -42,7 +61,7 @@ public class HostList extends ListActivity {
 
         // host設定の取り出しと設定
         myjson = new MyJson(getApplicationContext());
-        json = myjson.readFile(IrcClient.HOSTS_FILE);
+        json = myjson.readFile(HOSTS_FILE);
         hosts = new ArrayList<IrcHost>();
         int host_num = json.length();
         for (int i = 0; i < host_num; i++) {
@@ -58,46 +77,62 @@ public class HostList extends ListActivity {
         // アダプターにセット
         HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
         setListAdapter(adapter);
+        // ロングタップメニュー登録
+        registerForContextMenu(getListView());
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        // 選択されたホスト
-        final int host_no = position;
-        final IrcHost host = hosts.get(host_no);
-        // ダイアログで操作を表示
-        final AlertDialog.Builder ad = new AlertDialog.Builder(HostList.this);
-        final CharSequence[] menus = { "connect", "edit", "delete" };
-        ad.setTitle("Action");
-        ad.setItems(menus, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        if (host.isConnected()) {
-                            host.close();
-                        } else {
-                            host.connect();
-                            setResult(RESULT_OK);
-                            finish();
-                        }
-                        break;
-                    case 1:
-                        Intent i = new Intent(HostList.this, EditHost.class);
-                        i.putExtra("host_no", host_no);
-                        startActivity(i);
-                        break;
-                    case 2:
-                        HostList.this.removeHost(host_no);
-                        break;
-                    default:
-                        break;
+    }
+
+    /**
+     * ロングタップ時のmenu表示
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        // 選択された位置を取得
+        AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfo;
+        int pos = mi.position;
+        // hostを取得
+        IrcHost host = hosts.get(pos);
+        // 接続状況で表示切替
+        if (!host.isConnected()) {
+            menu.add(Menu.NONE, MENU_CONNECT, Menu.NONE, "connect");
+        } else {
+            menu.add(Menu.NONE, MENU_DISCONNECT, Menu.NONE, "disconnect");
+        }
+        menu.add(Menu.NONE, MENU_EDITHOST, Menu.NONE, "edit");
+        menu.add(Menu.NONE, MENU_REMOVEHOST, Menu.NONE, "remove");
+    }
+    
+    /**
+     * ロングタップメニューの動作
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resCode, Intent data) {
+        switch (reqCode) {
+            case SHOW_EDITHOST:
+                if (resCode == RESULT_OK) {
+                    // host channel
+                    Intent intent = new Intent(this, IrcClient.class);
+                    startActivityForResult(intent, SHOW_HOSTRECIEVE);
                 }
-            }
-        });
-        ad.create().show();
+                break;
+            case SHOW_HOSTRECIEVE:
+                if (resCode == RESULT_OK) {
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -115,7 +150,7 @@ public class HostList extends ListActivity {
                 for (int i = 0; i < hosts.size(); i++) {
                     tmp.put(hosts.get(i));
                 }
-                myjson.writeFile(IrcClient.HOSTS_FILE, tmp.toString());
+                myjson.writeFile(HOSTS_FILE, tmp.toString());
             } catch (Exception e) {
                 // TODO: handle exception
             }

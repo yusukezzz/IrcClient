@@ -9,7 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Context;
-import android.util.Log;
 
 public class MyJson {
     private Context context;
