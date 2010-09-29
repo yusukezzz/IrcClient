@@ -35,7 +35,7 @@ public class EditHost extends Activity {
 
         // host設定読み込み
         this.myjson = new MyJson(getApplicationContext());
-        this.json = myjson.readFile(HostList.HOSTS_FILE);
+        this.json = myjson.readFile(IrcClient.HOSTS_FILE);
 
         // 要素の用意
         this.hostname = (EditText) this.findViewById(R.id.edithost_hostname);
@@ -80,7 +80,7 @@ public class EditHost extends Activity {
                         json.put(new_host);
                     }
                     // 書き込み
-                    myjson.writeFile(HostList.HOSTS_FILE, json.toString());
+                    myjson.writeFile(IrcClient.HOSTS_FILE, json.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

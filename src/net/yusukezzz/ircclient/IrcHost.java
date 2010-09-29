@@ -253,10 +253,13 @@ public class IrcHost extends Thread {
      */
     private void sendMsg(String ch, String text) {
         String line = Util.getTime() + " " + text + "\n";
-        IrcChannel channel = channels.get(ch);
-        Log.d("IRC", "ch:" + ch);
+        IrcChannel channel = null;
+        try {
+            channel = channels.get(ch);
+        } catch (NullPointerException e) {
+            channel = null;
+        }
         if (channel == null) {
-            Log.d("IRC", "host recieve");
             receive += line;
         } else {
             channel.addRecieve(line);

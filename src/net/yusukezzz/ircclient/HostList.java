@@ -7,73 +7,39 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class HostList extends ListActivity {
-    public static final String HOSTS_FILE       = "hosts.json";
-    private MyJson             myjson           = null;
-    private JSONArray          json             = null;
-    private List<IrcHost>      hosts            = null;
-
+    private List<IrcHost> hosts;
     // Context Menu Items id
     private static final int   MENU_CONNECT     = Menu.FIRST;
     private static final int   MENU_DISCONNECT  = Menu.FIRST + 1;
     private static final int   MENU_EDITHOST    = Menu.FIRST + 2;
     private static final int   MENU_REMOVEHOST  = Menu.FIRST + 3;
 
-    // Activity request code
-    public static final int    SHOW_EDITHOST    = 0;
-    public static final int    SHOW_HOSTRECIEVE = 1;
-
-    /**
-     * 文字コードを返す
-     * 
-     * @return charset[]
-     */
-    private String getCharsets(int pos) {
-        String[] charsets = getResources().getStringArray(R.array.charsets);
-        return charsets[pos];
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.hostlist);
-
-        // host設定の取り出しと設定
-        myjson = new MyJson(getApplicationContext());
-        json = myjson.readFile(HOSTS_FILE);
-        hosts = new ArrayList<IrcHost>();
-        int host_num = json.length();
-        for (int i = 0; i < host_num; i++) {
-            JSONObject jsobj;
-            try {
-                jsobj = json.getJSONObject(i);
-                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
-                        .getString("nick"), jsobj.getString("login"), getCharsets(jsobj
-                        .getInt("charset"))));
-            } catch (JSONException e) {
-            }
-        }
+        
+        // host設定取得
+        hosts = IrcClient.getHosts();
+        
         // アダプターにセット
         HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
         setListAdapter(adapter);
@@ -81,14 +47,23 @@ public class HostList extends ListActivity {
         registerForContextMenu(getListView());
     }
 
+    /**
+     * タップで接続
+     */
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
+    protected void onListItemClick(ListView l, View v, int pos, long id) {
+        super.onListItemClick(l, v, pos, id);
+        IrcHost host = hosts.get(pos);
+        if (!host.isConnected()) {
+            host.connect();
+        }
+        IrcClient.setCurrentHost(host);
+        Intent intent = new Intent(this, IrcClient.class);
+        startActivity(intent);
     }
 
     /**
-     * ロングタップ時のmenu表示
+     * ロングタップでmenu表示
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -108,54 +83,37 @@ public class HostList extends ListActivity {
         menu.add(Menu.NONE, MENU_REMOVEHOST, Menu.NONE, "remove");
         menu.setHeaderTitle("Action");
     }
-    
+
     /**
      * ロングタップメニューの動作
      */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        return true;
-    }
-
-    @Override
-    protected void onActivityResult(int reqCode, int resCode, Intent data) {
-        switch (reqCode) {
-            case SHOW_EDITHOST:
-                if (resCode == RESULT_OK) {
-                    // host channel
-                    Intent intent = new Intent(this, IrcClient.class);
-                    startActivityForResult(intent, SHOW_HOSTRECIEVE);
-                }
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        int pos = info.position;
+        IrcHost host = hosts.get(pos);
+        switch (item.getItemId()) {
+            case MENU_CONNECT:
+                host.connect();
+                IrcClient.setCurrentHost(host);
+                Intent show_host = new Intent(this, IrcClient.class);
+                startActivity(show_host);
                 break;
-            case SHOW_HOSTRECIEVE:
-                if (resCode == RESULT_OK) {
-                }
+            case MENU_DISCONNECT:
+                host.close();
+                break;
+            case MENU_EDITHOST:
+                Intent edit_host = new Intent(this, EditHost.class);
+                edit_host.putExtra("host_no", pos);
+                startActivityForResult(edit_host, IrcClient.SHOW_EDITHOST);
+                break;
+            case MENU_REMOVEHOST:
+                IrcClient.removeHost(pos);
                 break;
             default:
                 break;
         }
-    }
-
-    /**
-     * hostsから設定を削除し、ファイルを更新
-     * 
-     * @param host_no
-     */
-    private void removeHost(int host_no) {
-        if (!hosts.isEmpty()) {
-            try {
-                // 削除
-                hosts.remove(host_no);
-                // 最新のhostsをファイルに保存
-                JSONArray tmp = new JSONArray();
-                for (int i = 0; i < hosts.size(); i++) {
-                    tmp.put(hosts.get(i));
-                }
-                myjson.writeFile(HOSTS_FILE, tmp.toString());
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-        }
+        return true;
     }
 
     /**

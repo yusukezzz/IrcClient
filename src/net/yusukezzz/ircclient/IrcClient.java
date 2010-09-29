@@ -1,6 +1,11 @@
 package net.yusukezzz.ircclient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,19 +24,26 @@ import android.widget.TextView;
 
 public class IrcClient extends Activity {
     // Menu item ID
-    private static final int  MENU_ID_HOSTS  = (Menu.FIRST + 1);
-    private static final int  MENU_ID_JOIN   = (Menu.FIRST + 2);
+    private static final int     MENU_ID_HOSTS  = (Menu.FIRST + 1);
+    private static final int     MENU_ID_JOIN   = (Menu.FIRST + 2);
 
+    // Activity request code
+    public static final int      SHOW_HOSTLIST  = 0;
+    public static final int      SHOW_EDITHOST  = 1;
 
-    private static IrcHost    currentHost    = null;
-    private static IrcChannel currentChannel = null;
+    private static IrcHost       currentHost    = null;
+    private static IrcChannel    currentChannel = null;
+    private static Handler       handler        = null;
 
     // channel view
-    private TextView          recieve;
-    private EditText          sendtxt;
-    private Button            postbtn;
+    private TextView             recieve;
+    private EditText             sendtxt;
+    private Button               postbtn;
 
-    private static Handler    handler        = null;
+    private static MyJson        myjson         = null;
+    private JSONArray            json           = null;
+    private static List<IrcHost> hosts          = null;
+    public static final String   HOSTS_FILE     = "hosts.json";
 
     @Override
     public void onResume() {
@@ -65,9 +77,10 @@ public class IrcClient extends Activity {
                     case 0:
                         // 発言を更新
                         // String[] arr = msg.obj.toString().split("#");
-                        if (currentHost != null && currentChannel != null) {
+                        if (currentHost != null) {
                             // 出力
-                            String str = currentChannel.getRecieve();
+                            String str = currentChannel == null ? currentHost.getRecieve()
+                                    : currentChannel.getRecieve();
                             recieve.setText(str);
                         }
                         break;
@@ -75,8 +88,47 @@ public class IrcClient extends Activity {
                 super.handleMessage(msg);
             }
         };
+
+        // host設定の取り出しと設定
+        myjson = new MyJson(getApplicationContext());
+        json = myjson.readFile(HOSTS_FILE);
+        hosts = new ArrayList<IrcHost>();
+        int host_num = json.length();
+        for (int i = 0; i < host_num; i++) {
+            JSONObject jsobj;
+            try {
+                jsobj = json.getJSONObject(i);
+                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
+                        .getString("nick"), jsobj.getString("login"), getCharsets(jsobj
+                        .getInt("charset"))));
+            } catch (JSONException e) {
+            }
+        }
     }
 
+    @Override
+    protected void onActivityResult(int reqCode, int resCode, Intent data) {
+        switch (reqCode) {
+            case SHOW_HOSTLIST:
+                if (resCode == RESULT_OK) {
+                    // host channel
+                    // Intent intent = new Intent(this, IrcClient.class);
+                    // startActivityForResult(intent, SHOW_HOSTRECIEVE);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Handlerを返す
+     * 
+     * @return handler
+     */
+    public static Handler getHandler() {
+        return IrcClient.handler;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -91,7 +143,7 @@ public class IrcClient extends Activity {
             case MENU_ID_HOSTS:
                 // ホストのリストを表示
                 Intent intent = new Intent(IrcClient.this, HostList.class);
-                startActivityForResult(intent, HostList.SHOW_HOSTRECIEVE);
+                startActivityForResult(intent, SHOW_HOSTLIST);
                 break;
             case MENU_ID_JOIN:
                 // join dialog
@@ -111,6 +163,10 @@ public class IrcClient extends Activity {
         currentHost = host;
     }
 
+    public static List<IrcHost> getHosts() {
+        return hosts;
+    }
+
     /**
      * 表示に使用するチャンネルを設定する
      * 
@@ -118,15 +174,6 @@ public class IrcClient extends Activity {
      */
     public static void setCurrentChannel(IrcChannel ch) {
         currentChannel = ch;
-    }
-
-    /**
-     * Handlerを返す
-     * 
-     * @return handler
-     */
-    public static Handler getHandler() {
-        return IrcClient.handler;
     }
 
     /**
@@ -139,5 +186,37 @@ public class IrcClient extends Activity {
             currentHost.privmsg(currentChannel.getName(), text);
             sendtxt.setText("");
         }
+    }
+
+    /**
+     * hostsから設定を削除し、ファイルを更新
+     * 
+     * @param host_no
+     */
+    public static void removeHost(int host_no) {
+        if (!hosts.isEmpty()) {
+            try {
+                // 削除
+                hosts.remove(host_no);
+                // 最新のhostsをファイルに保存
+                JSONArray tmp = new JSONArray();
+                for (int i = 0; i < hosts.size(); i++) {
+                    tmp.put(hosts.get(i));
+                }
+                myjson.writeFile(HOSTS_FILE, tmp.toString());
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        }
+    }
+
+    /**
+     * 文字コードを返す
+     * 
+     * @return charset[]
+     */
+    private String getCharsets(int pos) {
+        String[] charsets = getResources().getStringArray(R.array.charsets);
+        return charsets[pos];
     }
 }
