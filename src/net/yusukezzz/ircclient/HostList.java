@@ -58,8 +58,8 @@ public class HostList extends ListActivity {
             host.connect();
         }
         IrcClient.setCurrentHost(host);
-        Intent intent = new Intent(this, IrcClient.class);
-        startActivity(intent);
+        setResult(RESULT_OK);
+        finish();
     }
 
     /**
@@ -96,8 +96,8 @@ public class HostList extends ListActivity {
             case MENU_CONNECT:
                 host.connect();
                 IrcClient.setCurrentHost(host);
-                Intent show_host = new Intent(this, IrcClient.class);
-                startActivity(show_host);
+                setResult(RESULT_OK);
+                finish();
                 break;
             case MENU_DISCONNECT:
                 host.close();

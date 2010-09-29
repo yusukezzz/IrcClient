@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,26 +23,25 @@ import android.widget.TextView;
 
 public class IrcClient extends Activity {
     // Menu item ID
-    private static final int     MENU_ID_HOSTS  = (Menu.FIRST + 1);
-    private static final int     MENU_ID_JOIN   = (Menu.FIRST + 2);
+    private static final int          MENU_ID_HOSTS  = (Menu.FIRST + 1);
+    private static final int          MENU_ID_JOIN   = (Menu.FIRST + 2);
 
     // Activity request code
-    public static final int      SHOW_HOSTLIST  = 0;
-    public static final int      SHOW_EDITHOST  = 1;
+    public static final int           SHOW_HOSTLIST  = 0;
+    public static final int           SHOW_EDITHOST  = 1;
 
-    private static IrcHost       currentHost    = null;
-    private static IrcChannel    currentChannel = null;
-    private static Handler       handler        = null;
+    private static IrcHost            currentHost    = null;
+    private static IrcChannel         currentChannel = null;
+    private static Handler            handler        = null;
 
     // channel view
-    private TextView             recieve;
-    private EditText             sendtxt;
-    private Button               postbtn;
+    private TextView                  recieve;
+    private EditText                  sendtxt;
+    private Button                    postbtn;
 
-    private static MyJson        myjson         = null;
-    private JSONArray            json           = null;
-    private static List<IrcHost> hosts          = null;
-    public static final String   HOSTS_FILE     = "hosts.json";
+    private static MyJson             myjson         = null;
+    private static ArrayList<IrcHost> hosts          = null;
+    public static final String        HOSTS_FILE     = "hosts.json";
 
     @Override
     public void onResume() {
@@ -89,9 +87,9 @@ public class IrcClient extends Activity {
             }
         };
 
-        // host設定の取り出しと設定
+        // host設定の読み込み
         myjson = new MyJson(getApplicationContext());
-        json = myjson.readFile(HOSTS_FILE);
+        JSONArray json = myjson.readFile(HOSTS_FILE);
         hosts = new ArrayList<IrcHost>();
         int host_num = json.length();
         for (int i = 0; i < host_num; i++) {
@@ -189,6 +187,18 @@ public class IrcClient extends Activity {
     }
 
     /**
+     * ホストを追加する
+     * 
+     * @param host
+     */
+    public static void addHost(IrcHost host) {
+        if (host != null) {
+            hosts.add(host);
+            updateJson();
+        }
+    }
+
+    /**
      * hostsから設定を削除し、ファイルを更新
      * 
      * @param host_no
@@ -196,17 +206,29 @@ public class IrcClient extends Activity {
     public static void removeHost(int host_no) {
         if (!hosts.isEmpty()) {
             try {
+                IrcHost host = hosts.get(host_no);
+                if (host.isConnected()) {
+                    host.close();
+                }
                 // 削除
                 hosts.remove(host_no);
-                // 最新のhostsをファイルに保存
-                JSONArray tmp = new JSONArray();
-                for (int i = 0; i < hosts.size(); i++) {
-                    tmp.put(hosts.get(i));
-                }
-                myjson.writeFile(HOSTS_FILE, tmp.toString());
+                updateJson();
             } catch (Exception e) {
                 // TODO: handle exception
             }
+        }
+    }
+
+    /**
+     * 最新のhostsをファイルに保存
+     */
+    private static void updateJson() {
+        if (!hosts.isEmpty()) {
+            JSONArray json = new JSONArray();
+            for (IrcHost tmp : hosts) {
+                json.put(tmp);
+            }
+            myjson.writeFile(HOSTS_FILE, json.toString());
         }
     }
 
