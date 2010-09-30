@@ -3,7 +3,6 @@ package net.yusukezzz.ircclient;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,6 +16,7 @@ public class EditHost extends Activity {
     private EditText port;
     private EditText nick;
     private EditText login;
+    private EditText real;
     private Spinner  charspn;
     private int      charset;
     private Button   edithostbtn;
@@ -31,7 +31,7 @@ public class EditHost extends Activity {
         String[] charsets = getResources().getStringArray(R.array.charsets);
         return charsets[pos];
     }
-    
+
     /**
      * 文字コードの番号を返す
      * @param charset
@@ -40,7 +40,7 @@ public class EditHost extends Activity {
     private int getCharsetsPos(String charset) {
         int pos = 0;
         String[] charsets = getResources().getStringArray(R.array.charsets);
-        for (int i=0; i<charsets.length; i++) {
+        for (int i = 0; i < charsets.length; i++) {
             if (charsets[i] == charset) {
                 pos = i;
             }
@@ -54,14 +54,17 @@ public class EditHost extends Activity {
         setContentView(R.layout.edithost);
 
         // 要素の用意
-        this.hostname = (EditText) this.findViewById(R.id.edithost_hostname);
-        this.port = (EditText) this.findViewById(R.id.edithost_port);
-        this.nick = (EditText) this.findViewById(R.id.edithost_nick);
-        this.login = (EditText) this.findViewById(R.id.edithost_login);
-        charspn = (Spinner) this.findViewById(R.id.edithost_charset);
-        this.edithostbtn = (Button) this.findViewById(R.id.edithost_btn);
+        hostname = (EditText) findViewById(R.id.edithost_hostname);
+        port = (EditText) findViewById(R.id.edithost_port);
+        nick = (EditText) findViewById(R.id.edithost_nick);
+        login = (EditText) findViewById(R.id.edithost_login);
+        real = (EditText) findViewById(R.id.edithost_real);
+        charspn = (Spinner) findViewById(R.id.edithost_charset);
+        edithostbtn = (Button) findViewById(R.id.edithost_btn);
 
+        // インテント取得
         Intent i = getIntent();
+        // 更新だったらデータセット
         host_no = i.getIntExtra("host_no", -1);
         if (host_no != -1) {
             try {
@@ -70,29 +73,31 @@ public class EditHost extends Activity {
                 port.setText(host.getPort(), BufferType.NORMAL);
                 nick.setText(host.getNick(), BufferType.NORMAL);
                 login.setText(host.getLogin(), BufferType.NORMAL);
+                real.setText(host.getReal(), BufferType.NORMAL);
                 charspn.setSelection(getCharsetsPos(host.getCharset()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+        // saveを押された時の処理
         edithostbtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // ホストを保存する
                 try {
                     charset = (int) charspn.getSelectedItemId();
-                    Log.d("IRC", getCharsets(charset));
                     // 更新の場合は削除してから追加
                     if (host_no != -1) {
                         IrcClient.removeHost(host_no);
                     }
+                    // 追加
                     IrcClient.addHost(new IrcHost(hostname.getText().toString(), Integer
                             .parseInt(port.getText().toString()), nick.getText().toString(), login
-                            .getText().toString(), getCharsets(charset)));
+                            .getText().toString(), real.getText().toString(), getCharsets(charset)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                // ホスト一覧に戻る
                 setResult(RESULT_OK);
                 finish();
             }

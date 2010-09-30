@@ -1,5 +1,9 @@
 package net.yusukezzz.ircclient;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -7,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,6 +41,7 @@ public class IrcClient extends Activity {
     private static Handler            handler        = null;
 
     // channel view
+    private TextView                  title;
     private TextView                  recieve;
     private EditText                  sendtxt;
     private Button                    postbtn;
@@ -51,9 +57,10 @@ public class IrcClient extends Activity {
         // レイアウトをchannel画面に
         setContentView(R.layout.main);
         // channelの部品準備
-        recieve = (TextView) this.findViewById(R.id.TextView01);
-        postbtn = (Button) this.findViewById(R.id.Button01);
-        sendtxt = (EditText) this.findViewById(R.id.EditText01);
+        title = (TextView) findViewById(R.id.title);
+        recieve = (TextView) this.findViewById(R.id.recieve);
+        postbtn = (Button) this.findViewById(R.id.post_btn);
+        sendtxt = (EditText) this.findViewById(R.id.send_test);
         // 送信ボタンにイベントをセット
         postbtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -67,7 +74,7 @@ public class IrcClient extends Activity {
         IrcClient.handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                // 発言表示を更新
+                // 表示を更新
                 if (currentHost != null) {
                     // 出力
                     String str = currentChannel == null ? currentHost.getRecieve() : currentChannel
@@ -88,7 +95,8 @@ public class IrcClient extends Activity {
             try {
                 jsobj = json.getJSONObject(i);
                 hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
-                        .getString("nick"), jsobj.getString("login"), jsobj.getString("charset")));
+                        .getString("nick"), jsobj.getString("login"), jsobj.getString("real"),
+                        jsobj.getString("charset")));
             } catch (JSONException e) {
                 Log.e("IRC", e.getMessage());
             }
@@ -103,8 +111,8 @@ public class IrcClient extends Activity {
     protected void onActivityResult(int reqCode, int resCode, Intent data) {
         switch (reqCode) {
             case SHOW_HOSTLIST:
-                if (resCode != RESULT_OK) {
-                    Log.e("IRC", reqCode + ": " + resCode);
+                if (resCode == RESULT_OK && currentHost != null) {
+                    updateTitle();
                 }
                 break;
             default:
@@ -152,6 +160,7 @@ public class IrcClient extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         String ch = edit.getText().toString();
                         setCurrentChannel(currentHost.join(ch));
+                        updateTitle();
                     }
                 });
                 dialog.setNegativeButton("cancel", null);
@@ -182,6 +191,15 @@ public class IrcClient extends Activity {
         currentChannel = ch;
         // view の更新
         IrcClient.handler.sendEmptyMessage(0);
+    }
+
+    /**
+     * タイトルを更新する 実際にはトピックを表示する
+     */
+    public void updateTitle() {
+        String str = currentHost.getHostName()
+                + (currentChannel != null ? currentChannel.getName() : "");
+        title.setText(str);
     }
 
     /**
@@ -261,4 +279,49 @@ public class IrcClient extends Activity {
             myjson.writeFile(HOSTS_FILE, json.toString());
         }
     }
+
+    /**
+     * JSONのファイル入出力を行う
+     */
+    private class MyJson {
+        private Context context;
+
+        public MyJson(Context context) {
+            this.context = context;
+        }
+
+        public JSONArray readFile(String filename) {
+            JSONArray json = null;
+            try {
+                FileInputStream fis = this.context.openFileInput(filename);
+                byte[] readByte = new byte[fis.available()];
+                fis.read(readByte);
+                json = new JSONArray(new String(readByte));
+            } catch (FileNotFoundException e) {
+                // ファイルがなければ空のJSON
+                return json = new JSONArray();
+            } catch (IOException e) {
+                Log.e("IRC", e.getMessage());
+            } catch (JSONException e) {
+                Log.e("IRC", e.getMessage());
+            }
+            return json;
+        }
+
+        public boolean writeFile(String filename, String src) {
+            try {
+                FileOutputStream fos = this.context.openFileOutput(filename, Context.MODE_PRIVATE);
+                fos.write(src.getBytes());
+                fos.close();
+            } catch (FileNotFoundException e) {
+                Log.e("IRC", e.getMessage());
+                return false;
+            } catch (IOException e) {
+                Log.e("IRC", e.getMessage());
+                return false;
+            }
+            return true;
+        }
+    }
+
 }

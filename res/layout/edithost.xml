@@ -7,7 +7,9 @@
 <EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/edithost_nick"></EditText>
 </LinearLayout><LinearLayout android:id="@+id/LinearLayout04" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical"><TextView android:id="@+id/TextView05" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="login name" android:layout_weight="0"></TextView>
 <EditText android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:id="@+id/edithost_login"></EditText>
-</LinearLayout><LinearLayout android:id="@+id/LinearLayout05" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingBottom="20px" android:orientation="vertical"><TextView android:id="@+id/TextView06" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="charset" android:layout_weight="0"></TextView>
+</LinearLayout><LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical" android:id="@+id/LinearLayout05"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0" android:id="@+id/TextView06" android:text="real name"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:id="@+id/edithost_real"></EditText>
+</LinearLayout><LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingBottom="20px" android:orientation="vertical" android:id="@+id/LinearLayout06"><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="charset" android:layout_weight="0" android:id="@+id/TextView07"></TextView>
 
 
 <Spinner android:layout_height="wrap_content" android:layout_weight="1" android:layout_width="fill_parent" android:entries="@array/charsets" android:id="@+id/edithost_charset"></Spinner>

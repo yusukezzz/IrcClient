@@ -3,6 +3,11 @@ package net.yusukezzz.ircclient;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * IrcHostの受信したメッセージを正規表現で振り分けるクラス
+ * @author yusuke
+ *
+ */
 public class IrcReply {
     // 識別対象リプライ
     private String          reply         = "";
