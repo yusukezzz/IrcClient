@@ -72,7 +72,12 @@ public class IrcHost extends Thread {
     public void close() {
         if (socket != null) {
             try {
+                // quit 送信
                 this.quit();
+                // 入出力ストリーム切断
+                br.close();
+                bw.close();
+                // ソケット切断
                 socket.close();
             } catch (IOException e) {
                 Log.e("IRC", e.getMessage());
@@ -125,6 +130,7 @@ public class IrcHost extends Thread {
             Log.e("IRC", e.getMessage());
         } catch (IOException e) {
             Log.e("IRC", e.getMessage());
+            br = null;
         }
     }
 
@@ -263,7 +269,7 @@ public class IrcHost extends Thread {
     }
 
     public void quit() {
-        this.write("QUIT :");
+        this.write("QUIT :Leaving...");
     }
 
     /**

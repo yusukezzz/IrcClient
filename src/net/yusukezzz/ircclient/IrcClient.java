@@ -106,6 +106,20 @@ public class IrcClient extends Activity {
         Intent intent = new Intent(this, HostList.class);
         startActivityForResult(intent, SHOW_HOSTLIST);
     }
+    
+    @Override
+    protected void onDestroy() {
+        if (hosts != null) {
+            // 接続しているhostがあったら切断
+            for (IrcHost host : hosts) {
+                if (host.isConnected()) {
+                    host.close();
+                }
+            }
+            hosts = null;
+        }
+        super.onDestroy();
+    }
 
     @Override
     protected void onActivityResult(int reqCode, int resCode, Intent data) {
