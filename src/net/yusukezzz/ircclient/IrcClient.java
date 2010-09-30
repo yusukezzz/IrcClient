@@ -1,8 +1,6 @@
 package net.yusukezzz.ircclient;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,9 +12,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Editable.Factory;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,17 +67,12 @@ public class IrcClient extends Activity {
         IrcClient.handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case 0:
-                        // 発言を更新
-                        // String[] arr = msg.obj.toString().split("#");
-                        if (currentHost != null) {
-                            // 出力
-                            String str = currentChannel == null ? currentHost.getRecieve()
-                                    : currentChannel.getRecieve();
-                            recieve.setText(str);
-                        }
-                        break;
+                // 発言表示を更新
+                if (currentHost != null) {
+                    // 出力
+                    String str = currentChannel == null ? currentHost.getRecieve() : currentChannel
+                            .getRecieve();
+                    recieve.setText(str);
                 }
                 super.handleMessage(msg);
             }
@@ -97,13 +88,12 @@ public class IrcClient extends Activity {
             try {
                 jsobj = json.getJSONObject(i);
                 hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
-                        .getString("nick"), jsobj.getString("login"), getCharsets(jsobj
-                        .getInt("charset"))));
+                        .getString("nick"), jsobj.getString("login"), jsobj.getString("charset")));
             } catch (JSONException e) {
                 Log.e("IRC", e.getMessage());
             }
         }
-        
+
         // ホスト一覧へ
         Intent intent = new Intent(this, HostList.class);
         startActivityForResult(intent, SHOW_HOSTLIST);
@@ -124,7 +114,6 @@ public class IrcClient extends Activity {
 
     /**
      * Handlerを返す
-     * 
      * @return handler
      */
     public static Handler getHandler() {
@@ -151,19 +140,22 @@ public class IrcClient extends Activity {
                     break;
                 }
                 // join dialog
-                LayoutInflater factory = LayoutInflater.from(this);
-                final View join_dialog = factory.inflate(R.layout.join_dialog, null);
-                final EditText edit = (EditText) join_dialog.findViewById(R.id.join_channel);
+                final EditText edit = new EditText(this);
+                edit.setSingleLine();
+                edit.setWidth(100);
+                edit.setText("#");
                 AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-                dialog.setMessage("input channel name. Like #hoge");
-                dialog.setView(join_dialog);
+                dialog.setMessage("input channel name.\nLike #hoge");
+                dialog.setView(edit);
                 dialog.setPositiveButton("join", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String ch = edit.getText().toString();
-                        setCurrentChannel( currentHost.join(ch) );
+                        setCurrentChannel(currentHost.join(ch));
                     }
                 });
+                dialog.setNegativeButton("cancel", null);
+                dialog.show();
                 break;
             default:
                 break;
@@ -172,12 +164,39 @@ public class IrcClient extends Activity {
     }
 
     /**
-     * 表示に使用するホストを設定する
-     * 
-     * @param IrcHost
+     * 表示に使用するホストとチャンネル(最後に見ていたもの)を設定する
+     * @param host
      */
     public static void setCurrentHost(IrcHost host) {
         currentHost = host;
+        currentChannel = host.getLastChanel();
+        // view の更新
+        IrcClient.handler.sendEmptyMessage(0);
+    }
+
+    /**
+     * 表示に使用するチャンネルを設定する
+     * @param ch
+     */
+    public static void setCurrentChannel(IrcChannel ch) {
+        currentChannel = ch;
+        // view の更新
+        IrcClient.handler.sendEmptyMessage(0);
+    }
+
+    /**
+     * ホストを返す
+     * @param pos
+     * @return IrcHost
+     */
+    public static IrcHost getHost(int pos) {
+        IrcHost host = null;
+        try {
+            host = hosts.get(pos);
+        } catch (Exception e) {
+            Log.e("IRC", e.getMessage());
+        }
+        return host;
     }
 
     /**
@@ -189,17 +208,7 @@ public class IrcClient extends Activity {
     }
 
     /**
-     * 表示に使用するチャンネルを設定する
-     * 
-     * @param IrcChannel
-     */
-    public static void setCurrentChannel(IrcChannel ch) {
-        currentChannel = ch;
-    }
-
-    /**
      * テキストをIRCサーバに送信
-     * 
      * @param text
      */
     private void postText(String text) {
@@ -211,7 +220,6 @@ public class IrcClient extends Activity {
 
     /**
      * ホストを追加する
-     * 
      * @param host
      */
     public static void addHost(IrcHost host) {
@@ -223,7 +231,6 @@ public class IrcClient extends Activity {
 
     /**
      * hostsから設定を削除し、ファイルを更新
-     * 
      * @param host_no
      */
     public static void removeHost(int host_no) {
@@ -249,19 +256,9 @@ public class IrcClient extends Activity {
         if (!hosts.isEmpty()) {
             JSONArray json = new JSONArray();
             for (IrcHost tmp : hosts) {
-                json.put(tmp);
+                json.put(tmp.toJson());
             }
             myjson.writeFile(HOSTS_FILE, json.toString());
         }
-    }
-
-    /**
-     * 文字コードを返す
-     * 
-     * @return charset[]
-     */
-    private String getCharsets(int pos) {
-        String[] charsets = getResources().getStringArray(R.array.charsets);
-        return charsets[pos];
     }
 }

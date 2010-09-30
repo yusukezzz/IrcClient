@@ -25,6 +25,8 @@ public class HostList extends ListActivity {
     private static final int   MENU_DISCONNECT  = Menu.FIRST + 1;
     private static final int   MENU_EDITHOST    = Menu.FIRST + 2;
     private static final int   MENU_REMOVEHOST  = Menu.FIRST + 3;
+    
+    private HostAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,14 +37,14 @@ public class HostList extends ListActivity {
         hosts = IrcClient.getHosts();
         
         // アダプターにセット
-        HostAdapter adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
+        adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
     }
 
     /**
-     * タップで接続
+     * シングルタップで接続
      */
     @Override
     protected void onListItemClick(ListView l, View v, int pos, long id) {
@@ -103,11 +105,54 @@ public class HostList extends ListActivity {
                 break;
             case MENU_REMOVEHOST:
                 IrcClient.removeHost(pos);
+                updateList();
                 break;
             default:
                 break;
         }
         return true;
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, 1, Menu.NONE, "add host");
+        return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case 1:
+                // EditHostへ
+                Intent intent = new Intent(this, EditHost.class);
+                startActivityForResult(intent, IrcClient.SHOW_EDITHOST);
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+    
+    @Override
+    protected void onActivityResult(int reqCode, int resCode, Intent data) {
+        switch (reqCode) {
+            case IrcClient.SHOW_EDITHOST:
+                if (resCode == RESULT_OK) {
+                    // リストの更新
+                    updateList();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    
+    /**
+     * HostListを更新する
+     */
+    private void updateList() {
+        hosts = IrcClient.getHosts();
+        adapter.notifyDataSetChanged();
     }
 
     /**

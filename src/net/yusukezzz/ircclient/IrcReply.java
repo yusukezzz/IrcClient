@@ -25,7 +25,7 @@ public class IrcReply {
     static final String     PTRN_PRIVMSG  = ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)";
     static final String     PTRN_NAMES    = "353.+(#.+) :(.+)";
     static final String     PTRN_MOTD     = "372 .+ :-(.+)";
-    static final String     PTRN_END_MOTD = "376 .+ :End of /?MOTD command";
+    static final String     PTRN_END_MOTD = "376 .+ :End";
 
     public IrcReply(String msg) {
         this.reply = msg;

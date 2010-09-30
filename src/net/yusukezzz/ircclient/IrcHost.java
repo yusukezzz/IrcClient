@@ -10,26 +10,32 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 public class IrcHost extends Thread {
     private String                      HOST;
-    private Integer                     PORT;
+    private int                         PORT;
     private String                      NICK;
     private String                      LOGIN;
     private String                      CHARSET;
-    private Socket                      socket   = null;
+    private Socket                      socket      = null;
     private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
     // ch指定のないテキストを格納
-    private String                      receive  = "";
+    private String                      receive     = "";
+    // 最後に表示されていたchannel
+    private IrcChannel                  lastChannel = null;
 
-    private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
+    private HashMap<String, IrcChannel> channels    = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, Integer port, String nick, String login, String charset) {
+    public IrcHost(String host, int port, String nick, String login, String charset) {
         HOST = host;
         PORT = port;
         NICK = nick;
@@ -94,6 +100,9 @@ public class IrcHost extends Thread {
                         case IrcReply.RID_MOTD:
                             this.updateMsg("", res[1]);
                             break;
+                        case IrcReply.RID_END_MOTD:
+                            Log.d("IRC", "end motd");
+                            break;
                         case IrcReply.RID_JOIN:
                             this.updateMsg(res[1], " * join " + res[1]);
                             break;
@@ -104,7 +113,7 @@ public class IrcHost extends Thread {
                             this.updateMsg(res[1], " * names " + res[2]);
                             break;
                         default:
-                            this.updateMsg("", current);
+                            // this.updateMsg("", current);
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -120,7 +129,6 @@ public class IrcHost extends Thread {
 
     /**
      * 接続の状態を返す
-     * 
      * @return boolean
      */
     public boolean isConnected() {
@@ -133,20 +141,46 @@ public class IrcHost extends Thread {
 
     /**
      * ホスト名を返す
-     * 
      * @return String
      */
     public String getHostName() {
         return HOST;
     }
 
+    public String getPort() {
+        return String.valueOf(PORT);
+    }
+
+    public String getNick() {
+        return NICK;
+    }
+
+    public String getLogin() {
+        return LOGIN;
+    }
+
+    public String getCharset() {
+        return CHARSET;
+    }
+
+    /**
+     * 受信したテキストを返す
+     * @return　String
+     */
     public String getRecieve() {
         return receive;
+    }
+    
+    /**
+     * 最後に表示されたchannelを返す
+     * @return IrcChannel
+     */
+    public IrcChannel getLastChanel() {
+        return lastChannel;
     }
 
     /**
      * 指定したチャンネルのオブジェクトを返す
-     * 
      * @param name
      * @return IrcChannel
      */
@@ -156,7 +190,6 @@ public class IrcHost extends Thread {
 
     /**
      * ping に返信
-     * 
      * @param daemon
      */
     public void pong(String daemon) {
@@ -169,7 +202,6 @@ public class IrcHost extends Thread {
 
     /**
      * ニックネームを変更する
-     * 
      * @param nick
      */
     public void changeNick(String nick) {
@@ -178,7 +210,6 @@ public class IrcHost extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
-     * 
      * @param user
      * @param hostname
      * @param server
@@ -196,7 +227,6 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに参加する
-     * 
      * @param ch
      * @return IrcChannel
      */
@@ -205,14 +235,12 @@ public class IrcHost extends Thread {
         // チャンネルの追加
         IrcChannel ch = new IrcChannel(ch_name);
         channels.put(ch_name, ch);
-        // メンバーの取得
-        // this.names(ch_name);
+        lastChannel = ch;
         return ch;
     }
 
     /**
      * ユーザーリストを要求する
-     * 
      * @param ch
      */
     public void names(String ch) {
@@ -221,7 +249,6 @@ public class IrcHost extends Thread {
 
     /**
      * 退室メッセージ
-     * 
      * @param ch
      */
     public void leave(String ch) {
@@ -230,7 +257,6 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに発言する
-     * 
      * @param ch
      * @param str
      */
@@ -241,7 +267,6 @@ public class IrcHost extends Thread {
 
     /**
      * 実際にbufferWriterで書き込むメソッド
-     * 
      * @param cmd
      */
     private void write(String cmd) {
@@ -255,7 +280,6 @@ public class IrcHost extends Thread {
 
     /**
      * 受信テキストを更新し、handlerに描画指示を送る
-     * 
      * @param ch
      * @param text
      */
@@ -272,9 +296,21 @@ public class IrcHost extends Thread {
         } else {
             channel.addRecieve(line);
         }
-        Message msg = new Message();
-        msg.obj = HOST + ch; // example.com#hogech
-        msg.what = 0;
-        handler.sendMessage(msg);
+        // 表示の更新を指示
+        handler.sendEmptyMessage(0);
+    }
+
+    public JSONObject toJson() {
+        JSONObject jsobj = new JSONObject();
+        try {
+            jsobj.put("name", HOST);
+            jsobj.put("port", PORT);
+            jsobj.put("nick", NICK);
+            jsobj.put("login", LOGIN);
+            jsobj.put("charset", CHARSET);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsobj;
     }
 }
