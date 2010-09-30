@@ -34,6 +34,10 @@ public class IrcChannel {
         return true;
     }
 
+    /**
+     * ユーザーの人数を返す
+     * @return users.size
+     */
     public Integer getUsersNum() {
         return users.size();
     }

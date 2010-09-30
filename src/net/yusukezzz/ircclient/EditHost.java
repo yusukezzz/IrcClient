@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -56,7 +57,7 @@ public class EditHost extends Activity {
                 login.setText(host.get("login").toString(), BufferType.NORMAL);
                 charspn.setSelection(host.getInt("charset"));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e("IRC", e.getMessage());
             }
         }
 
@@ -82,7 +83,7 @@ public class EditHost extends Activity {
                     // 書き込み
                     myjson.writeFile(IrcClient.HOSTS_FILE, json.toString());
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("IRC", e.getMessage());
                 }
                 myjson = null;
                 setResult(RESULT_OK);

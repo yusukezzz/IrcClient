@@ -43,16 +43,16 @@ public class IrcHost extends Thread {
      */
     public void connect() {
         try {
-            this.sendMsg("", this.HOST + " connecting...");
+            this.updateMsg("", this.HOST + " connecting...");
             socket = new Socket(this.HOST, this.PORT);
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e("IRC", e.getMessage());
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            Log.e("IRC", e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("IRC", e.getMessage());
         }
         this.start();
         this.nick();
@@ -68,7 +68,7 @@ public class IrcHost extends Thread {
                 // TODO: send leave msg
                 socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("IRC", e.getMessage());
             }
         }
     }
@@ -89,29 +89,32 @@ public class IrcHost extends Thread {
                             this.pong(res[1]);
                             break;
                         case IrcReply.RID_SYSMSG:
-                            this.sendMsg("", " * " + res[1]);
+                            this.updateMsg("", " * " + res[1]);
+                            break;
+                        case IrcReply.RID_MOTD:
+                            this.updateMsg("", res[1]);
                             break;
                         case IrcReply.RID_JOIN:
-                            this.sendMsg(res[1], " * join " + res[1]);
+                            this.updateMsg(res[1], " * join " + res[1]);
                             break;
                         case IrcReply.RID_PRIVMSG:
-                            this.sendMsg(res[2], "<" + res[1] + "> " + res[3]);
+                            this.updateMsg(res[2], "<" + res[1] + "> " + res[3]);
                             break;
                         case IrcReply.RID_NAMES:
-                            this.sendMsg(res[1], " * names " + res[2]);
+                            this.updateMsg(res[1], " * names " + res[2]);
                             break;
                         default:
-                            this.sendMsg("", current);
+                            this.updateMsg("", current);
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    this.sendMsg("", "[Err]" + e.getMessage());
+                    Log.e("IRC", e.getMessage());
                 }
             }
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            Log.e("IRC", e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("IRC", e.getMessage());
         }
     }
 
@@ -186,6 +189,7 @@ public class IrcHost extends Thread {
         try {
             hostname = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
+            Log.e("IRC", e.getMessage());
         }
         this.write("USER " + NICK + " " + hostname + " " + HOST + " " + LOGIN + "\n");
     }
@@ -194,13 +198,16 @@ public class IrcHost extends Thread {
      * 指定channelに参加する
      * 
      * @param ch
+     * @return IrcChannel
      */
-    public void join(String ch) {
-        this.write("JOIN " + ch + "\n");
+    public IrcChannel join(String ch_name) {
+        this.write("JOIN " + ch_name + "\n");
         // チャンネルの追加
-        channels.put(ch, new IrcChannel(ch));
+        IrcChannel ch = new IrcChannel(ch_name);
+        channels.put(ch_name, ch);
         // メンバーの取得
-        // this.names(ch);
+        // this.names(ch_name);
+        return ch;
     }
 
     /**
@@ -229,7 +236,7 @@ public class IrcHost extends Thread {
      */
     public void privmsg(String ch, String str) {
         this.write("PRIVMSG " + ch + " " + str + "\n");
-        this.sendMsg(ch, "<" + NICK + "> " + str);
+        this.updateMsg(ch, "<" + NICK + "> " + str);
     }
 
     /**
@@ -242,6 +249,7 @@ public class IrcHost extends Thread {
             bw.write(cmd);
             bw.flush();
         } catch (IOException e) {
+            Log.e("IRC", e.getMessage());
         }
     }
 
@@ -251,7 +259,7 @@ public class IrcHost extends Thread {
      * @param ch
      * @param text
      */
-    private void sendMsg(String ch, String text) {
+    private void updateMsg(String ch, String text) {
         String line = Util.getTime() + " " + text + "\n";
         IrcChannel channel = null;
         try {

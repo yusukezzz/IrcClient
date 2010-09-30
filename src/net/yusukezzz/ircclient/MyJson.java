@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Context;
+import android.util.Log;
 
 public class MyJson {
     private Context context;
@@ -28,7 +29,9 @@ public class MyJson {
             // ファイルがなければ空のJSON
             return json = new JSONArray();
         } catch (IOException e) {
+            Log.e("IRC", e.getMessage());
         } catch (JSONException e) {
+            Log.e("IRC", e.getMessage());
         }
         return json;
     }
@@ -39,8 +42,10 @@ public class MyJson {
             fos.write(src.getBytes());
             fos.close();
         } catch (FileNotFoundException e) {
+            Log.e("IRC", e.getMessage());
             return false;
         } catch (IOException e) {
+            Log.e("IRC", e.getMessage());
             return false;
         }
         return true;

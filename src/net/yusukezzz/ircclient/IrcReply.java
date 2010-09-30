@@ -5,24 +5,27 @@ import java.util.regex.Pattern;
 
 public class IrcReply {
     // 識別対象リプライ
-    private String          reply          = "";
+    private String          reply         = "";
     // 識別結果の配列
-    private String[]        results        = {};
+    private String[]        results       = {};
 
     // IRCリプライの内部ID
-    public static final int RID_UNKNOWN    = 300;
-    public static final int RID_SYSMSG     = 1;
-    public static final int RID_PING       = 2;
-    public static final int RID_JOIN       = 3;
-    public static final int RID_PRIVMSG    = 4;
-    public static final int RID_NAMES      = 5;
+    public static final int RID_UNKNOWN   = 0;
+    public static final int RID_SYSMSG    = 1;
+    public static final int RID_PING      = 2;
+    public static final int RID_JOIN      = 3;
+    public static final int RID_PRIVMSG   = 4;
+    public static final int RID_NAMES     = 5;
+    public static final int RID_MOTD      = 6;
+    public static final int RID_END_MOTD  = 7;
     // IRCリプライの正規表現
-    static final String     PTRN_SYSMSG    = " \\* :(.+)";
-    static final String     PTRN_PING      = "^PING (:.+)";
-    static final String     PTRN_JOIN      = "JOIN :(#.+)";
-    static final String     PTRN_PRIVMSG   = ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)";
-    static final String     PTRN_NAMES     = "353.+(#.+) :(.+)";
-    static final String     PTRN_END_NAMES = "366.+(#.+) :End of NAMES list";
+    static final String     PTRN_SYSMSG   = " \\* :(.+)";
+    static final String     PTRN_PING     = "^PING (:.+)";
+    static final String     PTRN_JOIN     = "JOIN :(#.+)";
+    static final String     PTRN_PRIVMSG  = ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)";
+    static final String     PTRN_NAMES    = "353.+(#.+) :(.+)";
+    static final String     PTRN_MOTD     = "372 .+ :-(.+)";
+    static final String     PTRN_END_MOTD = "376 .+ :End of /?MOTD command";
 
     public IrcReply(String msg) {
         this.reply = msg;
@@ -58,6 +61,12 @@ public class IrcReply {
         if (this.match(PTRN_NAMES)) {
             return RID_NAMES;
         }
+        if (this.match(PTRN_MOTD)) {
+            return RID_MOTD;
+        }
+        if (this.match(PTRN_END_MOTD)) {
+            return RID_END_MOTD;
+        }
         // 未登録
         return RID_UNKNOWN;
     }
@@ -66,7 +75,7 @@ public class IrcReply {
      * 実際に正規表現チェックを行うメソッド
      * 
      * @param String pattern
-     * @return boolean true 成功時 false 失敗時
+     * @return boolean
      */
     public boolean match(String pattern) {
         return this.match(pattern, 0);

@@ -8,10 +8,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable.Factory;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,11 +47,6 @@ public class IrcClient extends Activity {
     private static MyJson             myjson         = null;
     private static ArrayList<IrcHost> hosts          = null;
     public static final String        HOSTS_FILE     = "hosts.json";
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,18 +100,21 @@ public class IrcClient extends Activity {
                         .getString("nick"), jsobj.getString("login"), getCharsets(jsobj
                         .getInt("charset"))));
             } catch (JSONException e) {
+                Log.e("IRC", e.getMessage());
             }
         }
+        
+        // ホスト一覧へ
+        Intent intent = new Intent(this, HostList.class);
+        startActivityForResult(intent, SHOW_HOSTLIST);
     }
 
     @Override
     protected void onActivityResult(int reqCode, int resCode, Intent data) {
         switch (reqCode) {
             case SHOW_HOSTLIST:
-                if (resCode == RESULT_OK) {
-                    // host channel
-                    // Intent intent = new Intent(this, IrcClient.class);
-                    // startActivityForResult(intent, SHOW_HOSTRECIEVE);
+                if (resCode != RESULT_OK) {
+                    Log.e("IRC", reqCode + ": " + resCode);
                 }
                 break;
             default:
@@ -144,7 +147,23 @@ public class IrcClient extends Activity {
                 startActivityForResult(intent, SHOW_HOSTLIST);
                 break;
             case MENU_ID_JOIN:
+                if (currentHost == null) {
+                    break;
+                }
                 // join dialog
+                LayoutInflater factory = LayoutInflater.from(this);
+                final View join_dialog = factory.inflate(R.layout.join_dialog, null);
+                final EditText edit = (EditText) join_dialog.findViewById(R.id.join_channel);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setMessage("input channel name. Like #hoge");
+                dialog.setView(join_dialog);
+                dialog.setPositiveButton("join", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String ch = edit.getText().toString();
+                        setCurrentChannel( currentHost.join(ch) );
+                    }
+                });
                 break;
             default:
                 break;
@@ -155,20 +174,24 @@ public class IrcClient extends Activity {
     /**
      * 表示に使用するホストを設定する
      * 
-     * @param host
+     * @param IrcHost
      */
     public static void setCurrentHost(IrcHost host) {
         currentHost = host;
     }
 
-    public static List<IrcHost> getHosts() {
+    /**
+     * ホストのリストを返す
+     * @return ArrayList<IrcHost>
+     */
+    public static ArrayList<IrcHost> getHosts() {
         return hosts;
     }
 
     /**
      * 表示に使用するチャンネルを設定する
      * 
-     * @param ch
+     * @param IrcChannel
      */
     public static void setCurrentChannel(IrcChannel ch) {
         currentChannel = ch;
@@ -214,7 +237,7 @@ public class IrcClient extends Activity {
                 hosts.remove(host_no);
                 updateJson();
             } catch (Exception e) {
-                // TODO: handle exception
+                Log.e("IRC", e.getMessage());
             }
         }
     }
