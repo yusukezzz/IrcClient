@@ -116,7 +116,7 @@ public class IrcClient extends Activity {
                     host.close();
                 }
             }
-            hosts = null;
+            hosts.clear();
         }
         super.onDestroy();
     }
