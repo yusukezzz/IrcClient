@@ -2,7 +2,8 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_height="wrap_content" android:layout_width="fill_parent">
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/hostlist_row_title" android:focusable="false" android:focusableInTouchMode="false" android:clickable="false" android:textSize="48px"></TextView>
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/hostlist_row_title" android:textSize="28px" android:scrollHorizontally="true" android:ellipsize="end"></TextView>
 
 
+<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/connectivity" android:layout_weight="0"></ImageView>
 </LinearLayout>

@@ -68,7 +68,7 @@ public class EditHost extends Activity {
         host_no = i.getIntExtra("host_no", -1);
         if (host_no != -1) {
             try {
-                IrcHost host = IrcClient.getHost(host_no);
+                IrcHost host = HostList.getHost(host_no);
                 hostname.setText(host.getHostName(), BufferType.NORMAL);
                 port.setText(host.getPort(), BufferType.NORMAL);
                 nick.setText(host.getNick(), BufferType.NORMAL);
@@ -88,10 +88,10 @@ public class EditHost extends Activity {
                     charset = (int) charspn.getSelectedItemId();
                     // 更新の場合は削除してから追加
                     if (host_no != -1) {
-                        IrcClient.removeHost(host_no);
+                        HostList.removeHost(host_no);
                     }
                     // 追加
-                    IrcClient.addHost(new IrcHost(hostname.getText().toString(), Integer
+                    HostList.addHost(new IrcHost(hostname.getText().toString(), Integer
                             .parseInt(port.getText().toString()), nick.getText().toString(), login
                             .getText().toString(), real.getText().toString(), getCharsets(charset)));
                 } catch (Exception e) {

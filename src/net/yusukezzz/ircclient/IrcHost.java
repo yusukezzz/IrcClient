@@ -14,7 +14,6 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Handler;
 import android.util.Log;
 
 public class IrcHost extends Thread {
@@ -25,7 +24,6 @@ public class IrcHost extends Thread {
     private String                      REAL;
     private String                      CHARSET;
     private Socket                      socket       = null;
-    private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
     // ch指定のないテキストを格納
@@ -42,7 +40,6 @@ public class IrcHost extends Thread {
         LOGIN = login;
         REAL = real;
         CHARSET = charset;
-        handler = IrcClient.getHandler();
     }
 
     /**
@@ -183,7 +180,7 @@ public class IrcHost extends Thread {
      * 最後に表示されたchannelを返す
      * @return IrcChannel
      */
-    public IrcChannel getLastChanel() {
+    public IrcChannel getLastChannel() {
         return last_channel;
     }
 
@@ -293,7 +290,7 @@ public class IrcHost extends Thread {
     }
 
     /**
-     * 受信テキストを更新し、handlerに描画指示を送る
+     * 受信テキストを更新する
      * @param ch
      * @param text
      */
@@ -310,8 +307,6 @@ public class IrcHost extends Thread {
         } else {
             channel.addRecieve(line);
         }
-        // 表示の更新を指示
-        handler.sendEmptyMessage(0);
     }
 
     /**
