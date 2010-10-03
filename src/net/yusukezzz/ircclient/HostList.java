@@ -61,9 +61,9 @@ public class HostList extends ListActivity {
             JSONObject jsobj;
             try {
                 jsobj = json.getJSONObject(i);
-                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getInt("port"), jsobj
-                        .getString("nick"), jsobj.getString("login"), jsobj.getString("real"),
-                        jsobj.getString("charset")));
+                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getBoolean("use_ssl"), jsobj
+                        .getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"), jsobj
+                        .getString("login"), jsobj.getString("real"), jsobj.getString("charset")));
             } catch (JSONException e) {
                 Log.e("IRC", e.getMessage());
             }
@@ -223,7 +223,7 @@ public class HostList extends ListActivity {
      * HostListを更新する
      */
     private void updateList() {
-        //adapter.notifyDataSetChanged();
+        // adapter.notifyDataSetChanged();
         // アダプターにセット
         adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
         setListAdapter(adapter);

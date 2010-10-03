@@ -20,7 +20,7 @@ public class IrcClient extends Activity {
     private static final int MENU_ID_HOSTS   = (Menu.FIRST + 1);
     private static final int MENU_ID_JOIN    = (Menu.FIRST + 2);
 
-    private final int        UPDATE_INTERBAL = 1000;
+    private final int        UPDATE_INTERVAL = 1000;
     private Handler          handler         = new Handler();
 
     // channel view
@@ -58,8 +58,8 @@ public class IrcClient extends Activity {
                             : HostList.currentCh.getRecieve();
                     recieve.setText(str);
                     updateTitle();
-                    // UPDATE_INTERBAL ms後に再描画
-                    handler.postDelayed(this, UPDATE_INTERBAL);
+                    // UPDATE_INTERVAL ms後に再描画
+                    handler.postDelayed(this, UPDATE_INTERVAL);
                 }
             }
         };
@@ -131,9 +131,8 @@ public class IrcClient extends Activity {
             // ホストのリストを表示
             setResult(RESULT_OK);
             finish();
-            return true;
         }
-        return true;
+        return super.dispatchKeyEvent(event);
     }
 
     /**

@@ -3,9 +3,11 @@ package net.yusukezzz.ircclient;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView.BufferType;
@@ -13,12 +15,13 @@ import android.widget.TextView.BufferType;
 public class EditHost extends Activity {
     // edit host view
     private EditText hostname;
+    private CheckBox use_ssl;
     private EditText port;
+    private EditText pass;
     private EditText nick;
     private EditText login;
     private EditText real;
     private Spinner  charspn;
-    private int      charset;
     private Button   edithostbtn;
     private int      host_no = -1;
 
@@ -27,7 +30,7 @@ public class EditHost extends Activity {
      * @param pos
      * @return charset
      */
-    private String getCharsets(int pos) {
+    private String getCharset(int pos) {
         String[] charsets = getResources().getStringArray(R.array.charsets);
         return charsets[pos];
     }
@@ -38,14 +41,13 @@ public class EditHost extends Activity {
      * @return
      */
     private int getCharsetsPos(String charset) {
-        int pos = 0;
         String[] charsets = getResources().getStringArray(R.array.charsets);
         for (int i = 0; i < charsets.length; i++) {
-            if (charsets[i] == charset) {
-                pos = i;
+            if (charsets[i].equals(charset)) {
+                return i;
             }
         }
-        return pos;
+        return 0;
     }
 
     @Override
@@ -55,7 +57,9 @@ public class EditHost extends Activity {
 
         // 要素の用意
         hostname = (EditText) findViewById(R.id.edithost_hostname);
+        use_ssl = (CheckBox) findViewById(R.id.edithost_use_ssl);
         port = (EditText) findViewById(R.id.edithost_port);
+        pass = (EditText) findViewById(R.id.edithost_server_pass);
         nick = (EditText) findViewById(R.id.edithost_nick);
         login = (EditText) findViewById(R.id.edithost_login);
         real = (EditText) findViewById(R.id.edithost_real);
@@ -70,7 +74,9 @@ public class EditHost extends Activity {
             try {
                 IrcHost host = HostList.getHost(host_no);
                 hostname.setText(host.getHostName(), BufferType.NORMAL);
+                use_ssl.setChecked(host.getUseSSL());
                 port.setText(host.getPort(), BufferType.NORMAL);
+                pass.setText(host.getPassword());
                 nick.setText(host.getNick(), BufferType.NORMAL);
                 login.setText(host.getLogin(), BufferType.NORMAL);
                 real.setText(host.getReal(), BufferType.NORMAL);
@@ -85,15 +91,18 @@ public class EditHost extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    charset = (int) charspn.getSelectedItemId();
+                    int pos = (int) charspn.getSelectedItemId();
+                    Log.d("IRC", pos + "=" + getCharset(pos));
                     // 更新の場合は削除してから追加
                     if (host_no != -1) {
                         HostList.removeHost(host_no);
                     }
                     // 追加
-                    HostList.addHost(new IrcHost(hostname.getText().toString(), Integer
-                            .parseInt(port.getText().toString()), nick.getText().toString(), login
-                            .getText().toString(), real.getText().toString(), getCharsets(charset)));
+                    HostList.addHost(new IrcHost(hostname.getText().toString(),
+                            use_ssl.isChecked(), Integer.parseInt(port.getText().toString()),
+                            pass.getText().toString(), nick.getText().toString(),
+                            login.getText().toString(), real.getText().toString(),
+                            getCharset(pos)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
