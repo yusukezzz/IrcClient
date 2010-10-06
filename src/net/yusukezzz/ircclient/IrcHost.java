@@ -14,18 +14,18 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Handler;
 import android.util.Log;
 
 public class IrcHost extends Thread {
     private String                      HOST;
+    private boolean                     USE_SSL;
     private int                         PORT;
+    private String                      PASS;
     private String                      NICK;
     private String                      LOGIN;
     private String                      REAL;
     private String                      CHARSET;
     private Socket                      socket       = null;
-    private Handler                     handler;
     private BufferedWriter              bw;
     private BufferedReader              br;
     // ch指定のないテキストを格納
@@ -35,14 +35,15 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels     = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, int port, String nick, String login, String real, String charset) {
+    public IrcHost(String host, boolean use_ssl, int port, String pass, String nick, String login, String real, String charset) {
         HOST = host;
+        USE_SSL = use_ssl;
         PORT = port;
+        PASS = pass;
         NICK = nick;
         LOGIN = login;
         REAL = real;
         CHARSET = charset;
-        handler = IrcClient.getHandler();
     }
 
     /**
@@ -54,6 +55,7 @@ public class IrcHost extends Thread {
             socket = new Socket(this.HOST, this.PORT);
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
+            Log.d("IRC", CHARSET);
         } catch (UnsupportedEncodingException e) {
             Log.e("IRC", e.getMessage());
         } catch (UnknownHostException e) {
@@ -62,6 +64,9 @@ public class IrcHost extends Thread {
             Log.e("IRC", e.getMessage());
         }
         this.start();
+        if (PASS != "") {
+            this.pass(PASS);
+        }
         this.changeNick(NICK);
         this.user();
     }
@@ -150,9 +155,17 @@ public class IrcHost extends Thread {
     public String getHostName() {
         return HOST;
     }
+    
+    public boolean getUseSSL() {
+        return USE_SSL;
+    }
 
     public String getPort() {
         return String.valueOf(PORT);
+    }
+    
+    public String getPassword() {
+        return PASS;
     }
 
     public String getNick() {
@@ -183,7 +196,7 @@ public class IrcHost extends Thread {
      * 最後に表示されたchannelを返す
      * @return IrcChannel
      */
-    public IrcChannel getLastChanel() {
+    public IrcChannel getLastChannel() {
         return last_channel;
     }
 
@@ -202,6 +215,14 @@ public class IrcHost extends Thread {
      */
     public void pong(String daemon) {
         this.write("PONG " + daemon);
+    }
+
+    /**
+     * パスワード登録
+     * @param password
+     */
+    public void pass(String password) {
+        this.write("PASS " + password);
     }
 
     /**
@@ -293,7 +314,7 @@ public class IrcHost extends Thread {
     }
 
     /**
-     * 受信テキストを更新し、handlerに描画指示を送る
+     * 受信テキストを更新する
      * @param ch
      * @param text
      */
@@ -310,8 +331,6 @@ public class IrcHost extends Thread {
         } else {
             channel.addRecieve(line);
         }
-        // 表示の更新を指示
-        handler.sendEmptyMessage(0);
     }
 
     /**
@@ -322,7 +341,9 @@ public class IrcHost extends Thread {
         JSONObject jsobj = new JSONObject();
         try {
             jsobj.put("name", HOST);
+            jsobj.put("use_ssl", USE_SSL);
             jsobj.put("port", PORT);
+            jsobj.put("pass", PASS);
             jsobj.put("nick", NICK);
             jsobj.put("login", LOGIN);
             jsobj.put("real", REAL);
