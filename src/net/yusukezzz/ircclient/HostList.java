@@ -363,14 +363,12 @@ public class HostList extends ListActivity {
             IrcHost host = hosts.get(position);
             TextView textView = (TextView) view.findViewById(R.id.hostlist_row_title);
             textView.setText(host.getHostName());
-            ImageView connectivity = (ImageView) view.findViewById(R.id.connectivity);
-            Drawable icon = null;
+            TextView connectivity = (TextView) view.findViewById(R.id.connectivity);
+            // 接続状態を表示
+            connectivity.setText("");
             if (host.isConnected()) {
-                icon = getResources().getDrawable(R.drawable.connect);
-            } else {
-                icon = getResources().getDrawable(R.drawable.disconnect);
+                connectivity.setText("Connect");
             }
-            connectivity.setImageDrawable(icon);
             return view;
         }
     }

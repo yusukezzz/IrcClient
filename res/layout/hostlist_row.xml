@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_height="wrap_content" android:layout_width="fill_parent">
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:id="@+id/hostlist_row_title" android:textSize="28px" android:scrollHorizontally="true" android:ellipsize="end"></TextView>
+  android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="vertical">
+<TextView android:id="@+id/hostlist_row_title" android:scrollHorizontally="true" android:ellipsize="end" android:layout_height="wrap_content" android:textSize="28px" android:layout_width="wrap_content"></TextView>
 
 
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/connectivity" android:layout_weight="0"></ImageView>
+
+
+
+
+<TextView android:id="@+id/connectivity" android:layout_height="wrap_content" android:textSize="14px" android:layout_width="wrap_content" android:layout_gravity="right" android:textColor="#00FF00"></TextView>
+
+
+
+
+
+
 </LinearLayout>
