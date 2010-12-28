@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -365,9 +366,12 @@ public class HostList extends ListActivity {
             textView.setText(host.getHostName());
             TextView connectivity = (TextView) view.findViewById(R.id.connectivity);
             // 接続状態を表示
-            connectivity.setText("");
             if (host.isConnected()) {
-                connectivity.setText("Connect");
+                connectivity.setText("Connected");
+                connectivity.setTextColor(Color.GREEN);
+            } else {
+                connectivity.setText("Disconnected");
+                connectivity.setTextColor(Color.RED);
             }
             return view;
         }
