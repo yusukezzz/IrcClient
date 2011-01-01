@@ -14,8 +14,6 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 public class IrcHost extends Thread {
     private String                      HOST;
     private boolean                     USE_SSL;
@@ -58,13 +56,13 @@ public class IrcHost extends Thread {
             socket = new Socket(this.HOST, this.PORT);
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
-            Log.d("IRC", CHARSET);
+            Util.debug(CHARSET);
         } catch (UnsupportedEncodingException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         } catch (UnknownHostException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         } catch (IOException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         }
         running = true;
         this.start();
@@ -107,8 +105,7 @@ public class IrcHost extends Thread {
             // 通信の切断
             this.disconnect();
         } catch (InterruptedException e) {
-            // TODO 自動生成された catch ブロック
-            e.printStackTrace();
+            Util.debug(e.getMessage());
         }
     }
 
@@ -387,7 +384,7 @@ public class IrcHost extends Thread {
             jsobj.put("real", REAL);
             jsobj.put("charset", CHARSET);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Util.debug(e.getMessage());
         }
         return jsobj;
     }

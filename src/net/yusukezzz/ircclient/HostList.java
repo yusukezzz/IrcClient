@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -64,7 +63,7 @@ public class HostList extends ListActivity {
                 IrcHost host = this.getHostByJsobj(jsobj);
                 hosts.add(host);
             } catch (JSONException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
             }
         }
 
@@ -254,7 +253,7 @@ public class HostList extends ListActivity {
         try {
             host = hosts.get(pos);
         } catch (Exception e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         }
         return host;
     }
@@ -296,7 +295,7 @@ public class HostList extends ListActivity {
                 hosts.remove(host_no);
                 updateJson();
             } catch (Exception e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
             }
         }
     }
@@ -335,9 +334,9 @@ public class HostList extends ListActivity {
                 // ファイルがなければ空のJSON
                 return json = new JSONArray();
             } catch (IOException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
             } catch (JSONException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
             }
             return json;
         }
@@ -348,10 +347,10 @@ public class HostList extends ListActivity {
                 fos.write(src.getBytes());
                 fos.close();
             } catch (FileNotFoundException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
                 return false;
             } catch (IOException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
                 return false;
             }
             return true;
