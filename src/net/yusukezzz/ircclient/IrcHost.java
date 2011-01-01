@@ -25,6 +25,8 @@ public class IrcHost extends Thread {
     private String                      LOGIN;
     private String                      REAL;
     private String                      CHARSET;
+    // thread 稼働フラグ
+    private boolean                     running      = false;
     private Socket                      socket       = null;
     private BufferedWriter              bw;
     private BufferedReader              br;
@@ -35,7 +37,8 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels     = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, boolean use_ssl, int port, String pass, String nick, String login, String real, String charset) {
+    public IrcHost(String host, boolean use_ssl, int port, String pass, String nick, String login,
+            String real, String charset) {
         HOST = host;
         USE_SSL = use_ssl;
         PORT = port;
@@ -63,6 +66,7 @@ public class IrcHost extends Thread {
         } catch (IOException e) {
             Log.e("IRC", e.getMessage());
         }
+        running = true;
         this.start();
         if (PASS != "") {
             this.pass(PASS);
@@ -72,21 +76,39 @@ public class IrcHost extends Thread {
     }
 
     /**
-     * ホストから切断する
+     * socket等を閉じる
      */
-    public void close() {
+    private void disconnect() {
         if (socket != null) {
             try {
-                // quit 送信
-                this.quit();
                 // 入出力ストリーム切断
                 br.close();
                 bw.close();
                 // ソケット切断
                 socket.close();
+                socket = null;
             } catch (IOException e) {
-                Log.e("IRC", e.getMessage());
+                Util.debug(e.getMessage());
             }
+        }
+    }
+
+    /**
+     * ホストから切断する
+     */
+    public void close() {
+        // Ircサーバーにquit 送信
+        this.quit();
+        // thread 停止
+        running = false;
+        try {
+            // thread 停止待ち
+            this.join();
+            // 通信の切断
+            this.disconnect();
+        } catch (InterruptedException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
         }
     }
 
@@ -95,7 +117,7 @@ public class IrcHost extends Thread {
         try {
             // 受信したメッセージを処理
             String current = null;
-            while ((current = br.readLine()) != null) {
+            while ((current = br.readLine()) != null && running) {
                 // IRCサーバからの応答を識別する
                 IrcReply reply = new IrcReply(current);
                 int reply_id = reply.parse();
@@ -125,19 +147,20 @@ public class IrcHost extends Thread {
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    Log.e("IRC", e.getMessage());
+                    Util.debug(e.getMessage());
                 }
             }
         } catch (UnknownHostException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         } catch (IOException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
             br = null;
         }
     }
 
     /**
      * 接続の状態を返す
+     *
      * @return boolean
      */
     public boolean isConnected() {
@@ -150,12 +173,13 @@ public class IrcHost extends Thread {
 
     /**
      * ホスト名を返す
+     *
      * @return String
      */
     public String getHostName() {
         return HOST;
     }
-    
+
     public boolean getUseSSL() {
         return USE_SSL;
     }
@@ -163,7 +187,7 @@ public class IrcHost extends Thread {
     public String getPort() {
         return String.valueOf(PORT);
     }
-    
+
     public String getPassword() {
         return PASS;
     }
@@ -186,6 +210,7 @@ public class IrcHost extends Thread {
 
     /**
      * 受信したテキストを返す
+     *
      * @return　String
      */
     public String getRecieve() {
@@ -194,6 +219,7 @@ public class IrcHost extends Thread {
 
     /**
      * 最後に表示されたchannelを返す
+     *
      * @return IrcChannel
      */
     public IrcChannel getLastChannel() {
@@ -202,6 +228,7 @@ public class IrcHost extends Thread {
 
     /**
      * 指定したチャンネルのオブジェクトを返す
+     *
      * @param name
      * @return IrcChannel
      */
@@ -211,6 +238,7 @@ public class IrcHost extends Thread {
 
     /**
      * ping に返信
+     *
      * @param daemon
      */
     public void pong(String daemon) {
@@ -219,6 +247,7 @@ public class IrcHost extends Thread {
 
     /**
      * パスワード登録
+     *
      * @param password
      */
     public void pass(String password) {
@@ -227,6 +256,7 @@ public class IrcHost extends Thread {
 
     /**
      * ニックネームを変更する
+     *
      * @param nick
      */
     public void changeNick(String nick) {
@@ -235,6 +265,7 @@ public class IrcHost extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
+     *
      * @param user
      * @param hostname
      * @param server
@@ -245,13 +276,14 @@ public class IrcHost extends Thread {
         try {
             hostname = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         }
         this.write("USER " + LOGIN + " " + hostname + " " + HOST + " :" + REAL);
     }
 
     /**
      * 指定channelに参加する
+     *
      * @param ch
      * @return IrcChannel
      */
@@ -272,6 +304,7 @@ public class IrcHost extends Thread {
 
     /**
      * ユーザーリストを要求する
+     *
      * @param ch
      */
     public void names(String ch) {
@@ -280,6 +313,7 @@ public class IrcHost extends Thread {
 
     /**
      * 退室メッセージ
+     *
      * @param ch
      */
     public void part(String ch) {
@@ -292,6 +326,7 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに発言する
+     *
      * @param ch
      * @param str
      */
@@ -302,6 +337,7 @@ public class IrcHost extends Thread {
 
     /**
      * 実際にbufferWriterで書き込むメソッド
+     *
      * @param cmd
      */
     private void write(String cmd) {
@@ -309,12 +345,13 @@ public class IrcHost extends Thread {
             bw.write(cmd + "\n");
             bw.flush();
         } catch (IOException e) {
-            Log.e("IRC", e.getMessage());
+            Util.debug(e.getMessage());
         }
     }
 
     /**
      * 受信テキストを更新する
+     *
      * @param ch
      * @param text
      */
@@ -335,6 +372,7 @@ public class IrcHost extends Thread {
 
     /**
      * ホストの設定値をJSONObjectとして返す
+     *
      * @return JSONObject
      */
     public JSONObject toJson() {

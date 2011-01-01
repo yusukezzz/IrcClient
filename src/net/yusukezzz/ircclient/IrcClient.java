@@ -34,7 +34,7 @@ public class IrcClient extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // レイアウトをchannel画面に
-        setContentView(R.layout.channel);
+        setContentView(R.layout.channel_with_user_list);
         // channelの部品準備
         title = (TextView) findViewById(R.id.title);
         recieve = (TextView) this.findViewById(R.id.recieve);

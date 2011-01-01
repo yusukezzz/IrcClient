@@ -43,6 +43,7 @@ public class HostList extends ListActivity {
     public static IrcChannel          currentCh       = null;
     private static ArrayList<IrcHost> hosts           = null;
     public static final String        HOSTS_FILE      = "hosts.json";
+    private JSONArray                 json;
     private static MyJson             myjson          = null;
     private HostAdapter               adapter;
 
@@ -53,16 +54,15 @@ public class HostList extends ListActivity {
 
         // host設定の読み込み
         myjson = new MyJson(getApplicationContext());
-        JSONArray json = myjson.readFile(HOSTS_FILE);
+        json = myjson.readFile(HOSTS_FILE);
         hosts = new ArrayList<IrcHost>();
         int host_num = json.length();
         for (int i = 0; i < host_num; i++) {
             JSONObject jsobj;
             try {
                 jsobj = json.getJSONObject(i);
-                hosts.add(new IrcHost(jsobj.getString("name"), jsobj.getBoolean("use_ssl"), jsobj
-                        .getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"), jsobj
-                        .getString("login"), jsobj.getString("real"), jsobj.getString("charset")));
+                IrcHost host = this.getHostByJsobj(jsobj);
+                hosts.add(host);
             } catch (JSONException e) {
                 Log.e("IRC", e.getMessage());
             }
@@ -73,6 +73,12 @@ public class HostList extends ListActivity {
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
+    }
+
+    private IrcHost getHostByJsobj(JSONObject jsobj) throws JSONException {
+        return new IrcHost(jsobj.getString("name"), jsobj.getBoolean("use_ssl"),
+                jsobj.getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"),
+                jsobj.getString("login"), jsobj.getString("real"), jsobj.getString("charset"));
     }
 
     private void showChannel() {
@@ -132,6 +138,13 @@ public class HostList extends ListActivity {
                 break;
             case MENU_DISCONNECT:
                 host.close();
+                try {
+                    hosts.set(pos, this.getHostByJsobj(json.getJSONObject(pos)));
+                } catch (JSONException e) {
+                    // TODO 自動生成された catch ブロック
+                    e.printStackTrace();
+                }
+                updateList();
                 break;
             case MENU_EDITHOST:
                 Intent edit_host = new Intent(this, EditHost.class);
@@ -203,6 +216,7 @@ public class HostList extends ListActivity {
 
     /**
      * 表示に使用するホストとチャンネル(最後に見ていたもの)を設定する
+     *
      * @param host
      */
     public static void setCurrentHost(IrcHost host) {
@@ -212,6 +226,7 @@ public class HostList extends ListActivity {
 
     /**
      * 表示に使用するチャンネルを設定する
+     *
      * @param ch
      */
     public static void setCurrentCh(IrcChannel ch) {
@@ -230,6 +245,7 @@ public class HostList extends ListActivity {
 
     /**
      * ホストを返す
+     *
      * @param pos
      * @return IrcHost
      */
@@ -245,6 +261,7 @@ public class HostList extends ListActivity {
 
     /**
      * ホストのリストを返す
+     *
      * @return ArrayList<IrcHost>
      */
     public static ArrayList<IrcHost> getHosts() {
@@ -253,6 +270,7 @@ public class HostList extends ListActivity {
 
     /**
      * ホストを追加する
+     *
      * @param host
      */
     public static void addHost(IrcHost host) {
@@ -264,6 +282,7 @@ public class HostList extends ListActivity {
 
     /**
      * hostsから設定を削除し、ファイルを更新
+     *
      * @param host_no
      */
     public static void removeHost(int host_no) {
