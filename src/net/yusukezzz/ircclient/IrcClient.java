@@ -34,7 +34,7 @@ public class IrcClient extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // レイアウトをchannel画面に
-        setContentView(R.layout.main);
+        setContentView(R.layout.channel);
         // channelの部品準備
         title = (TextView) findViewById(R.id.title);
         recieve = (TextView) this.findViewById(R.id.recieve);
@@ -124,7 +124,7 @@ public class IrcClient extends Activity {
         }
         return true;
     }
-    
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {

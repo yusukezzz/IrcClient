@@ -53,7 +53,7 @@ public class EditHost extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edithost);
+        setContentView(R.layout.edit_host);
 
         // 要素の用意
         hostname = (EditText) findViewById(R.id.edithost_hostname);

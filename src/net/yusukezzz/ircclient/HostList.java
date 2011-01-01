@@ -15,7 +15,6 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -27,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -51,7 +49,7 @@ public class HostList extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.hostlist);
+        setContentView(R.layout.host_list);
 
         // host設定の読み込み
         myjson = new MyJson(getApplicationContext());
@@ -71,7 +69,7 @@ public class HostList extends ListActivity {
         }
 
         // アダプターにセット
-        adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
+        adapter = new HostAdapter(this, R.layout.host_list_row, hosts);
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
@@ -226,7 +224,7 @@ public class HostList extends ListActivity {
     private void updateList() {
         // adapter.notifyDataSetChanged();
         // アダプターにセット
-        adapter = new HostAdapter(this, R.layout.hostlist_row, hosts);
+        adapter = new HostAdapter(this, R.layout.host_list_row, hosts);
         setListAdapter(adapter);
     }
 
@@ -359,7 +357,7 @@ public class HostList extends ListActivity {
             View view = convertView;
             if (view == null) {
                 // 1行分のviewを生成
-                view = inflater.inflate(R.layout.hostlist_row, null);
+                view = inflater.inflate(R.layout.host_list_row, null);
             }
             IrcHost host = hosts.get(position);
             TextView textView = (TextView) view.findViewById(R.id.hostlist_row_title);
