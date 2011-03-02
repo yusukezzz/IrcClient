@@ -28,7 +28,7 @@ public class Util {
      * デバッグメッセージを出力
      * @param str
      */
-    public static void debug(String str) {
+    public static void d(String str) {
         Log.d("IRC", str);
     }
 }

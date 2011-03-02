@@ -63,12 +63,12 @@ public class HostList extends ListActivity {
                 IrcHost host = this.getHostByJsobj(jsobj);
                 hosts.add(host);
             } catch (JSONException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
             }
         }
 
         // アダプターにセット
-        adapter = new HostAdapter(this, R.layout.host_list_row, hosts);
+        adapter = new HostAdapter(getApplicationContext(), R.layout.host_list_row, hosts);
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
@@ -253,7 +253,7 @@ public class HostList extends ListActivity {
         try {
             host = hosts.get(pos);
         } catch (Exception e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
         return host;
     }
@@ -295,7 +295,7 @@ public class HostList extends ListActivity {
                 hosts.remove(host_no);
                 updateJson();
             } catch (Exception e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
             }
         }
     }
@@ -334,9 +334,9 @@ public class HostList extends ListActivity {
                 // ファイルがなければ空のJSON
                 return json = new JSONArray();
             } catch (IOException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
             } catch (JSONException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
             }
             return json;
         }
@@ -347,10 +347,10 @@ public class HostList extends ListActivity {
                 fos.write(src.getBytes());
                 fos.close();
             } catch (FileNotFoundException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
                 return false;
             } catch (IOException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
                 return false;
             }
             return true;

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class IrcChannel {
     private String                             name;
-    private ArrayList<HashMap<String, String>> users   = new ArrayList<HashMap<String, String>>();
+    private ArrayList<User> users   = new ArrayList<User>();
     private String                             recieve = "";
 
     public IrcChannel(String ch) {
@@ -14,7 +14,7 @@ public class IrcChannel {
 
     /**
      * チャンネルに所属するユーザーリストを更新
-     * 
+     *
      * @param names
      * @return bool
      */
@@ -24,11 +24,9 @@ public class IrcChannel {
         String nameA[] = names.split(" ");
         for (int i = 0; i < nameA.length; i++) {
             // なるとチェック
-            HashMap<String, String> user = new HashMap<String, String>();
-            String u = nameA[i];
-            String naruto = u.indexOf("@") == 1 ? "yes" : "no";
-            user.put("naruto", naruto);
-            user.put("name", u);
+            String name = nameA[i];
+            boolean naruto = name.indexOf("@") == 1 ? true : false;
+            User user = new User(name, naruto);
             users.add(user);
         }
         return true;
@@ -36,28 +34,36 @@ public class IrcChannel {
 
     /**
      * ユーザーの人数を返す
-     * @return users.size
+     * @return users.size()
      */
     public Integer getUsersNum() {
         return users.size();
     }
 
     /**
+     * users を返す
+     * @return users
+     */
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
+    /**
      * ユーザーの名前一覧をListで返す
-     * 
+     *
      * @return names
      */
     public ArrayList<String> getUserNames() {
         ArrayList<String> names = new ArrayList<String>();
         for (int i = 0; i < users.size(); i++) {
-            names.add(users.get(i).get("name"));
+            names.add(users.get(i).getName());
         }
         return names;
     }
 
     /**
      * チャンネルの名前を設定する
-     * 
+     *
      * @param channel name
      */
     public void setName(String name) {
@@ -66,7 +72,7 @@ public class IrcChannel {
 
     /**
      * チャンネルの名前を返す
-     * 
+     *
      * @return channel name
      */
     public String getName() {
@@ -75,7 +81,7 @@ public class IrcChannel {
 
     /**
      * 受信テキストに追加する
-     * 
+     *
      * @param line
      */
     public void addRecieve(String line) {
@@ -84,7 +90,7 @@ public class IrcChannel {
 
     /**
      * 受信テキストを返す
-     * 
+     *
      * @return recieve
      */
     public String getRecieve() {

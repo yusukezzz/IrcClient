@@ -1,5 +1,7 @@
 package net.yusukezzz.ircclient;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -13,6 +15,8 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class IrcClient extends Activity {
@@ -28,13 +32,21 @@ public class IrcClient extends Activity {
     private TextView         recieve;
     private EditText         sendtxt;
     private Button           postbtn;
+    private ListView         user_list;
+    private UserListAdapter  adapter;
+
+    private ArrayList<User>  users           = new ArrayList<User>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // レイアウトをchannel画面に
-        setContentView(R.layout.channel_with_user_list);
+        try {
+            setContentView(R.layout.channel_with_user_list);
+        } catch (Exception e) {
+            Util.d(e.getMessage());
+        }
         // channelの部品準備
         title = (TextView) findViewById(R.id.title);
         recieve = (TextView) this.findViewById(R.id.recieve);
@@ -54,8 +66,8 @@ public class IrcClient extends Activity {
             @Override
             public void run() {
                 if (HostList.currentHost != null) {
-                    String str = HostList.currentCh == null ? HostList.currentHost.getRecieve()
-                            : HostList.currentCh.getRecieve();
+                    String str = HostList.currentCh == null ? HostList.currentHost.getRecieve() : HostList.currentCh
+                            .getRecieve();
                     recieve.setText(str);
                     updateTitle();
                     // UPDATE_INTERVAL ms後に再描画
@@ -65,6 +77,16 @@ public class IrcClient extends Activity {
         };
         // 初回表示
         handler.post(looper);
+
+        // user 一覧
+        try {
+            // users = HostList.currentCh.getUsers();
+            adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, users);
+            user_list = (ListView) this.findViewById(R.id.user_list);
+            user_list.setAdapter(adapter);
+        } catch (Exception e) {
+            Util.d(e.getMessage());
+        }
     }
 
     @Override
@@ -144,8 +166,16 @@ public class IrcClient extends Activity {
         title.setText(str);
     }
 
+    public void updateUserList() {
+        if (HostList.currentHost != null && HostList.currentCh != null) {
+            adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row,
+                    HostList.currentCh.getUsers());
+        }
+    }
+
     /**
      * テキストをIRCサーバに送信
+     *
      * @param text
      */
     private void postText(String text) {

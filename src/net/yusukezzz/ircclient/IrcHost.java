@@ -56,13 +56,12 @@ public class IrcHost extends Thread {
             socket = new Socket(this.HOST, this.PORT);
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
-            Util.debug(CHARSET);
         } catch (UnsupportedEncodingException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         } catch (UnknownHostException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         } catch (IOException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
         running = true;
         this.start();
@@ -86,7 +85,14 @@ public class IrcHost extends Thread {
                 socket.close();
                 socket = null;
             } catch (IOException e) {
-                Util.debug(e.getMessage());
+                Util.d(e.getMessage());
+            } finally {
+                if (br != null) {
+                    br = null;
+                }
+                if (bw != null) {
+                    bw = null;
+                }
             }
         }
     }
@@ -95,7 +101,7 @@ public class IrcHost extends Thread {
      * ホストから切断する
      */
     public void close() {
-        // Ircサーバーにquit 送信
+        // Ircサーバーに quit 送信
         this.quit();
         // thread 停止
         running = false;
@@ -105,14 +111,16 @@ public class IrcHost extends Thread {
             // 通信の切断
             this.disconnect();
         } catch (InterruptedException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
     }
 
+    /**
+     * 受信したメッセージを処理
+     */
     @Override
     public void run() {
         try {
-            // 受信したメッセージを処理
             String current = null;
             while ((current = br.readLine()) != null && running) {
                 // IRCサーバからの応答を識別する
@@ -144,14 +152,20 @@ public class IrcHost extends Thread {
                             break;
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    Util.debug(e.getMessage());
+                    Util.d(e.getMessage());
                 }
+                Thread.sleep(100);
             }
         } catch (UnknownHostException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         } catch (IOException e) {
-            Util.debug(e.getMessage());
-            br = null;
+            Util.d(e.getMessage());
+        } catch (InterruptedException e) {
+            Util.d(e.getMessage());
+        } finally {
+            if (br != null) {
+                br = null;
+            }
         }
     }
 
@@ -273,7 +287,7 @@ public class IrcHost extends Thread {
         try {
             hostname = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
         this.write("USER " + LOGIN + " " + hostname + " " + HOST + " :" + REAL);
     }
@@ -342,7 +356,7 @@ public class IrcHost extends Thread {
             bw.write(cmd + "\n");
             bw.flush();
         } catch (IOException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
     }
 
@@ -384,7 +398,7 @@ public class IrcHost extends Thread {
             jsobj.put("real", REAL);
             jsobj.put("charset", CHARSET);
         } catch (JSONException e) {
-            Util.debug(e.getMessage());
+            Util.d(e.getMessage());
         }
         return jsobj;
     }
