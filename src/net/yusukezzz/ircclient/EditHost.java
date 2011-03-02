@@ -88,7 +88,6 @@ public class EditHost extends Activity {
 
         // saveを押された時の処理
         edithostbtn.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 try {
                     int pos = (int) charspn.getSelectedItemId();

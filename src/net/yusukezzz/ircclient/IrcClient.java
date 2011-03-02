@@ -54,7 +54,6 @@ public class IrcClient extends Activity {
         sendtxt = (EditText) this.findViewById(R.id.send_test);
         // 送信ボタンにイベントをセット
         postbtn.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 // サーバに送信
                 IrcClient.this.postText(sendtxt.getText().toString());
@@ -63,7 +62,6 @@ public class IrcClient extends Activity {
 
         // 定期的に受信テキストの表示を更新
         Runnable looper = new Runnable() {
-            @Override
             public void run() {
                 if (HostList.currentHost != null) {
                     String str = HostList.currentCh == null ? HostList.currentHost.getRecieve() : HostList.currentCh
@@ -132,7 +130,6 @@ public class IrcClient extends Activity {
                 dialog.setMessage("input channel name.\nLike #hoge");
                 dialog.setView(edit);
                 dialog.setPositiveButton("join", new DialogInterface.OnClickListener() {
-                    @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String ch = edit.getText().toString();
                         HostList.setCurrentCh(HostList.currentHost.join(ch));
