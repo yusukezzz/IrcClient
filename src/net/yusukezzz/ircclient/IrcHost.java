@@ -76,24 +76,20 @@ public class IrcHost extends Thread {
      * socket等を閉じる
      */
     private void disconnect() {
-        if (socket != null) {
-            try {
-                // 入出力ストリーム切断
+        try {
+            // 入出力ストリーム切断
+            if (br != null) {
                 br.close();
-                bw.close();
-                // ソケット切断
-                socket.close();
-                socket = null;
-            } catch (IOException e) {
-                Util.d(e.getMessage());
-            } finally {
-                if (br != null) {
-                    br = null;
-                }
-                if (bw != null) {
-                    bw = null;
-                }
             }
+            if (bw != null) {
+                bw.close();
+            }
+            // ソケット切断
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            Util.d(e.getMessage());
         }
     }
 
@@ -108,8 +104,6 @@ public class IrcHost extends Thread {
         try {
             // thread 停止待ち
             this.join();
-            // 通信の切断
-            this.disconnect();
         } catch (InterruptedException e) {
             Util.d(e.getMessage());
         }
@@ -163,15 +157,13 @@ public class IrcHost extends Thread {
         } catch (InterruptedException e) {
             Util.d(e.getMessage());
         } finally {
-            if (br != null) {
-                br = null;
-            }
+            // 切断
+            this.disconnect();
         }
     }
 
     /**
      * 接続の状態を返す
-     *
      * @return boolean
      */
     public boolean isConnected() {
@@ -184,7 +176,6 @@ public class IrcHost extends Thread {
 
     /**
      * ホスト名を返す
-     *
      * @return String
      */
     public String getHostName() {
@@ -221,7 +212,6 @@ public class IrcHost extends Thread {
 
     /**
      * 受信したテキストを返す
-     *
      * @return　String
      */
     public String getRecieve() {
@@ -230,7 +220,6 @@ public class IrcHost extends Thread {
 
     /**
      * 最後に表示されたchannelを返す
-     *
      * @return IrcChannel
      */
     public IrcChannel getLastChannel() {
@@ -239,7 +228,6 @@ public class IrcHost extends Thread {
 
     /**
      * 指定したチャンネルのオブジェクトを返す
-     *
      * @param name
      * @return IrcChannel
      */
@@ -249,7 +237,6 @@ public class IrcHost extends Thread {
 
     /**
      * ping に返信
-     *
      * @param daemon
      */
     public void pong(String daemon) {
@@ -258,7 +245,6 @@ public class IrcHost extends Thread {
 
     /**
      * パスワード登録
-     *
      * @param password
      */
     public void pass(String password) {
@@ -267,7 +253,6 @@ public class IrcHost extends Thread {
 
     /**
      * ニックネームを変更する
-     *
      * @param nick
      */
     public void changeNick(String nick) {
@@ -276,7 +261,6 @@ public class IrcHost extends Thread {
 
     /**
      * ircサーバにユーザー情報を登録する
-     *
      * @param user
      * @param hostname
      * @param server
@@ -294,7 +278,6 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに参加する
-     *
      * @param ch
      * @return IrcChannel
      */
@@ -315,7 +298,6 @@ public class IrcHost extends Thread {
 
     /**
      * ユーザーリストを要求する
-     *
      * @param ch
      */
     public void names(String ch) {
@@ -324,7 +306,6 @@ public class IrcHost extends Thread {
 
     /**
      * 退室メッセージ
-     *
      * @param ch
      */
     public void part(String ch) {
@@ -337,7 +318,6 @@ public class IrcHost extends Thread {
 
     /**
      * 指定channelに発言する
-     *
      * @param ch
      * @param str
      */
@@ -348,7 +328,6 @@ public class IrcHost extends Thread {
 
     /**
      * 実際にbufferWriterで書き込むメソッド
-     *
      * @param cmd
      */
     private void write(String cmd) {
@@ -362,7 +341,6 @@ public class IrcHost extends Thread {
 
     /**
      * 受信テキストを更新する
-     *
      * @param ch
      * @param text
      */
@@ -383,7 +361,6 @@ public class IrcHost extends Thread {
 
     /**
      * ホストの設定値をJSONObjectとして返す
-     *
      * @return JSONObject
      */
     public JSONObject toJson() {

@@ -1,7 +1,6 @@
 package net.yusukezzz.ircclient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class IrcChannel {
     private String                             name;

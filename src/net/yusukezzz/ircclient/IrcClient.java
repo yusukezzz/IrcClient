@@ -15,7 +15,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -59,6 +58,10 @@ public class IrcClient extends Activity {
                 IrcClient.this.postText(sendtxt.getText().toString());
             }
         });
+        // ユーザーリストの準備
+        adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, users);
+        user_list = (ListView) this.findViewById(R.id.user_list);
+        user_list.setAdapter(adapter);
 
         // 定期的に受信テキストの表示を更新
         Runnable looper = new Runnable() {
@@ -68,6 +71,7 @@ public class IrcClient extends Activity {
                             .getRecieve();
                     recieve.setText(str);
                     updateTitle();
+                    updateUserList();
                     // UPDATE_INTERVAL ms後に再描画
                     handler.postDelayed(this, UPDATE_INTERVAL);
                 }
@@ -75,16 +79,6 @@ public class IrcClient extends Activity {
         };
         // 初回表示
         handler.post(looper);
-
-        // user 一覧
-        try {
-            // users = HostList.currentCh.getUsers();
-            adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, users);
-            user_list = (ListView) this.findViewById(R.id.user_list);
-            user_list.setAdapter(adapter);
-        } catch (Exception e) {
-            Util.d(e.getMessage());
-        }
     }
 
     @Override
@@ -167,6 +161,7 @@ public class IrcClient extends Activity {
         if (HostList.currentHost != null && HostList.currentCh != null) {
             adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row,
                     HostList.currentCh.getUsers());
+            user_list.setAdapter(adapter);
         }
     }
 
