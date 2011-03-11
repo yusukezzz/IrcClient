@@ -98,9 +98,9 @@ public class EditHost extends Activity {
                     }
                     // 追加
                     HostList.addHost(new IrcHost(hostname.getText().toString(),
-                            use_ssl.isChecked(), Integer.parseInt(port.getText().toString()),
-                            pass.getText().toString(), nick.getText().toString(),
-                            login.getText().toString(), real.getText().toString(),
+                            use_ssl.isChecked(), Integer.parseInt(port.getText().toString()), pass
+                                    .getText().toString(), nick.getText().toString(), login
+                                    .getText().toString(), real.getText().toString(),
                             getCharset(pos)));
                 } catch (Exception e) {
                     Util.d(e.getMessage());

@@ -215,7 +215,6 @@ public class HostList extends ListActivity {
 
     /**
      * 表示に使用するホストとチャンネル(最後に見ていたもの)を設定する
-     *
      * @param host
      */
     public static void setCurrentHost(IrcHost host) {
@@ -225,7 +224,6 @@ public class HostList extends ListActivity {
 
     /**
      * 表示に使用するチャンネルを設定する
-     *
      * @param ch
      */
     public static void setCurrentCh(IrcChannel ch) {
@@ -244,7 +242,6 @@ public class HostList extends ListActivity {
 
     /**
      * ホストを返す
-     *
      * @param pos
      * @return IrcHost
      */
@@ -260,7 +257,6 @@ public class HostList extends ListActivity {
 
     /**
      * ホストのリストを返す
-     *
      * @return ArrayList<IrcHost>
      */
     public static ArrayList<IrcHost> getHosts() {
@@ -269,7 +265,6 @@ public class HostList extends ListActivity {
 
     /**
      * ホストを追加する
-     *
      * @param host
      */
     public static void addHost(IrcHost host) {
@@ -281,7 +276,6 @@ public class HostList extends ListActivity {
 
     /**
      * hostsから設定を削除し、ファイルを更新
-     *
      * @param host_no
      */
     public static void removeHost(int host_no) {

@@ -140,6 +140,7 @@ public class IrcHost extends Thread {
                             break;
                         case IrcReply.RID_NAMES:
                             this.updateMsg(res[1], " * names " + res[2]);
+                            this.updateUsers(res[1], res[2]);
                             break;
                         default:
                             this.updateMsg("", current);
@@ -160,6 +161,11 @@ public class IrcHost extends Thread {
             // 切断
             this.disconnect();
         }
+    }
+
+    private void updateUsers(String ch_name, String users) {
+        IrcChannel ch = getChannel(ch_name);
+        ch.updateUsers(users);
     }
 
     /**

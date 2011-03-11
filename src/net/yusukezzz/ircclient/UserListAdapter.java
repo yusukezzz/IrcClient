@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 public class UserListAdapter extends ArrayAdapter<User> {
-    private List<User> users;
+    private List<User>     users;
     private LayoutInflater inflater;
 
     public UserListAdapter(Context context, int resource, List<User> items) {

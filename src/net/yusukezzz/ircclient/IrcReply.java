@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 /**
  * IrcHostの受信したメッセージを正規表現で振り分けるクラス
  * @author yusuke
- *
  */
 public class IrcReply {
     // 識別対象リプライ
@@ -38,7 +37,6 @@ public class IrcReply {
 
     /**
      * 正規表現にマッチしたグループの配列を返す
-     * 
      * @return String[] results
      */
     public String[] get() {
@@ -47,7 +45,6 @@ public class IrcReply {
 
     /**
      * 正規表現チェックを行ない、リプライ内容に応じたIDを返す
-     * 
      * @return Integer RID
      */
     public int parse() {
@@ -78,7 +75,6 @@ public class IrcReply {
 
     /**
      * 実際に正規表現チェックを行うメソッド
-     * 
      * @param String pattern
      * @return boolean
      */

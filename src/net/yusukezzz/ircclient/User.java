@@ -1,7 +1,7 @@
 package net.yusukezzz.ircclient;
 
 public class User {
-    private String name;
+    private String  name;
     private boolean naruto = false;
 
     public User(String name, boolean naruto) {

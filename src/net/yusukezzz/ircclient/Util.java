@@ -9,7 +9,6 @@ public class Util {
 
     /**
      * hh:mm形式の現在時間文字列を返す
-     *
      * @return time hh:mm
      */
     public static String getTime() {

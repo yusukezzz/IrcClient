@@ -67,8 +67,8 @@ public class IrcClient extends Activity {
         Runnable looper = new Runnable() {
             public void run() {
                 if (HostList.currentHost != null) {
-                    String str = HostList.currentCh == null ? HostList.currentHost.getRecieve() : HostList.currentCh
-                            .getRecieve();
+                    String str = HostList.currentCh == null ? HostList.currentHost.getRecieve()
+                            : HostList.currentCh.getRecieve();
                     recieve.setText(str);
                     updateTitle();
                     updateUserList();
@@ -167,7 +167,6 @@ public class IrcClient extends Activity {
 
     /**
      * テキストをIRCサーバに送信
-     *
      * @param text
      */
     private void postText(String text) {
