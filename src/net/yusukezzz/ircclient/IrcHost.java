@@ -118,29 +118,32 @@ public class IrcHost extends Thread {
             String current = null;
             while ((current = br.readLine()) != null && running) {
                 // IRCサーバからの応答を識別する
-                IrcReply reply = new IrcReply(current);
-                int reply_id = reply.parse();
-                String[] res = reply.get();
+                IrcReplyParser replyParser = new IrcReplyParser(current);
+                IrcReply reply = replyParser.parse();
+                int reply_id = reply.getId();
+                String body = reply.getBody();
+                String channel = reply.getChannel();
+                String receivers = reply.getReceivers();
                 try {
                     switch (reply_id) {
-                        case IrcReply.RID_PING:
-                            this.pong(res[1]);
+                        case IrcReplyParser.RID_PING:
+                            this.pong(channel);
                             break;
-                        case IrcReply.RID_SYSMSG:
-                            this.updateMsg("", " * " + res[1]);
+                        case IrcReplyParser.RID_SYSMSG:
+                            this.updateMsg("", " * " + body);
                             break;
-                        case IrcReply.RID_MOTD:
-                            this.updateMsg("", res[1]);
+                        case IrcReplyParser.RID_MOTD:
+                            this.updateMsg("", body);
                             break;
-                        case IrcReply.RID_JOIN:
-                            this.updateMsg(res[1], " * join " + res[1]);
+                        case IrcReplyParser.RID_JOIN:
+                            this.updateMsg(channel, " * join " + channel);
                             break;
-                        case IrcReply.RID_PRIVMSG:
-                            this.updateMsg(res[2], "<" + res[1] + "> " + res[3]);
+                        case IrcReplyParser.RID_PRIVMSG:
+                            this.updateMsg(channel, "<" + receivers + "> " + body);
                             break;
-                        case IrcReply.RID_NAMES:
-                            this.updateMsg(res[1], " * names " + res[2]);
-                            this.updateUsers(res[1], res[2]);
+                        case IrcReplyParser.RID_NAMES:
+                            this.updateMsg(channel, " * names " + body);
+                            this.updateUsers(channel, body);
                             break;
                         default:
                             this.updateMsg("", current);
