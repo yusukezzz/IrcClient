@@ -8,98 +8,107 @@ import java.util.regex.Pattern;
  * @author yusuke
  */
 public class IrcReplyParser {
-    // 識別対象リプライ
-    private String          reply         = "";
-    // 識別結果の配列
-    private String[]        results       = {};
-
     // IRCリプライの内部ID
-    public static final int RID_UNKNOWN   = 0;
-    public static final int RID_SYSMSG    = 1;
-    public static final int RID_PING      = 2;
-    public static final int RID_JOIN      = 3;
-    public static final int RID_PRIVMSG   = 4;
-    public static final int RID_NAMES     = 5;
-    public static final int RID_MOTD      = 6;
-    public static final int RID_END_MOTD  = 7;
+    public static final int RID_UNKNOWN  = 255;
+    public static final int RID_SYSMSG   = 0;
+    public static final int RID_PING     = 1;
+    public static final int RID_JOIN     = 2;
+    public static final int RID_PRIVMSG  = 3;
+    public static final int RID_NAMES    = 4;
+    public static final int RID_MOTD     = 5;
+    public static final int RID_END_MOTD = 6;
+    
     // IRCリプライの正規表現
-    static final String     PTRN_SYSMSG   = " \\* :(.+)";
-    static final String     PTRN_PING     = "^PING (:.+)";
-    static final String     PTRN_JOIN     = "JOIN :(#.+)";
-    static final String     PTRN_PRIVMSG  = ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)";
-    static final String     PTRN_NAMES    = "353.+(#.+) :(.+)";
-    static final String     PTRN_MOTD     = "372 .+ :-(.+)";
-    static final String     PTRN_END_MOTD = "376 .+ :End";
-
-    public IrcReplyParser(String msg) {
-        this.reply = msg;
+    static String[]         patterns;
+    static {
+        patterns = new String[] {
+            " \\* :(.+)",
+            "^PING (:.+)",
+            "JOIN :(#.+)",
+            ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)",
+            "353.+(#.+) :(.+)",
+            "372 .+ :-(.+)",
+            "376 .+ :End",
+        };
     }
 
-    /**
-     * 正規表現にマッチしたグループの配列を返す
-     * @return String[] results
-     */
-    public String[] get() {
-        return this.results;
+    public IrcReplyParser() {
     }
 
     /**
      * 正規表現チェックを行ない、IrcReplyオブジェクトを生成する
-     * @return Integer RID
+     * @param String msg
+     * @return IrcReply reply
      */
-    public IrcReply parse() {
-        IrcReply rep = null;
-        if (this.match(PTRN_SYSMSG)) {
-            rep = new IrcReply(RID_SYSMSG, "", this.results[1]);
-        }
-        if (this.match(PTRN_PING, Pattern.CASE_INSENSITIVE)) {
-            rep = new IrcReply(RID_PING, this.results[1], "");
-        }
-        if (this.match(PTRN_JOIN, Pattern.CASE_INSENSITIVE)) {
-            rep = new IrcReply(RID_JOIN, this.results[1], "");
-        }
-        if (this.match(PTRN_PRIVMSG)) {
-            rep = new IrcReply(RID_PRIVMSG, this.results[2], this.results[3], this.results[3]);
-        }
-        if (this.match(PTRN_NAMES)) {
-            rep = new IrcReply(RID_NAMES, this.results[1], this.results[2]);
-        }
-        if (this.match(PTRN_MOTD)) {
-            rep = new IrcReply(RID_MOTD, "", this.results[1]);
-        }
-        if (this.match(PTRN_END_MOTD)) {
+    public static IrcReply parse(String msg) {
+        IrcReply reply = null;
+        String results[] = match(msg);
+        int replyId = RID_UNKNOWN;
+        try {
+            replyId = Integer.parseInt(results[0]);
+            switch (replyId) {
+                case RID_SYSMSG:
+                    reply = new IrcReply(RID_SYSMSG, "", results[2]);
+                    break;
+                case RID_PING:
+                    reply = new IrcReply(RID_PING, results[2], "");
+                    break;
+                case RID_JOIN:
+                    reply = new IrcReply(RID_JOIN, results[2], "");
+                    break;
+                case RID_PRIVMSG:
+                    reply = new IrcReply(RID_PRIVMSG, results[3], results[4], results[2]);
+                    break;
+                case RID_NAMES:
+                    reply = new IrcReply(RID_NAMES, results[2], results[3]);
+                    break;
+                case RID_MOTD:
+                    reply = new IrcReply(RID_MOTD, "", results[2]);
+                    break;
+                case RID_END_MOTD:
+                    break;
+                default:
+                    reply = null;
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            reply = null;
         }
         // 不明
-        if (rep == null) {
-            rep = new IrcReply(RID_UNKNOWN, "", "");
+        if (reply == null) {
+            reply = new IrcReply(RID_UNKNOWN, "", "");
         }
-        return rep;
+        return reply;
     }
 
     /**
-     * 実際に正規表現チェックを行うメソッド
+     * 実際に正規表現チェックを行うメソッド matchしたグループを配列で返す
      * @param String pattern
-     * @return boolean
+     * @return String[]
      */
-    public boolean match(String pattern) {
-        return this.match(pattern, 0);
-    }
-
-    public boolean match(String pattern, int option) {
-        // 正規表現でIRCサーバからの返信をチェック
-        Pattern regex = (option == 0) ? Pattern.compile(pattern) : Pattern.compile(pattern, option);
-        Matcher matcher = regex.matcher(this.reply);
-        // マッチしたら
-        if (matcher.find()) {
-            // 配列を初期化
-            int groups = matcher.groupCount() + 1;
-            this.results = new String[groups];
-            // ヒットしたグループを詰める
-            for (int i = 0; i < groups; i++) {
-                this.results[i] = matcher.group(i);
+    public static String[] match(String msg) {
+        int replyId = 0;
+        String[] results = null;
+        // 正規表現の数だけチェック
+        for (String pattern : patterns) {
+            Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(msg);
+            // マッチしたら
+            if (matcher.find()) {
+                // 配列を初期化 replyId の分で+1
+                int groups = matcher.groupCount() + 2;
+                results = new String[groups];
+                results[0] = replyId + "";
+                // ヒットしたグループを詰める
+                for (int i = 1; i < groups; i++) {
+                    results[i] = matcher.group(i-1);
+                }
+                break;
             }
-            return true;
+            replyId++;
         }
-        return false;
+        if (results == null) {
+            results = new String[1];
+            results[0] = RID_UNKNOWN + "";
+        }
+        return results;
     }
 }

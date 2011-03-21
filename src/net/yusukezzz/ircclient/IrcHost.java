@@ -118,47 +118,39 @@ public class IrcHost extends Thread {
             String current = null;
             while ((current = br.readLine()) != null && running) {
                 // IRCサーバからの応答を識別する
-                IrcReplyParser replyParser = new IrcReplyParser(current);
-                IrcReply reply = replyParser.parse();
+                IrcReply reply = IrcReplyParser.parse(current);
                 int reply_id = reply.getId();
                 String body = reply.getBody();
                 String channel = reply.getChannel();
-                String receivers = reply.getReceivers();
-                try {
-                    switch (reply_id) {
-                        case IrcReplyParser.RID_PING:
-                            this.pong(channel);
-                            break;
-                        case IrcReplyParser.RID_SYSMSG:
-                            this.updateMsg("", " * " + body);
-                            break;
-                        case IrcReplyParser.RID_MOTD:
-                            this.updateMsg("", body);
-                            break;
-                        case IrcReplyParser.RID_JOIN:
-                            this.updateMsg(channel, " * join " + channel);
-                            break;
-                        case IrcReplyParser.RID_PRIVMSG:
-                            this.updateMsg(channel, "<" + receivers + "> " + body);
-                            break;
-                        case IrcReplyParser.RID_NAMES:
-                            this.updateMsg(channel, " * names " + body);
-                            this.updateUsers(channel, body);
-                            break;
-                        default:
-                            this.updateMsg("", current);
-                            break;
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    Util.d(e.getMessage());
+                String from = reply.getFrom();
+                switch (reply_id) {
+                    case IrcReplyParser.RID_PING:
+                        this.pong(channel);
+                        break;
+                    case IrcReplyParser.RID_SYSMSG:
+                        this.updateMsg("", " * " + body);
+                        break;
+                    case IrcReplyParser.RID_MOTD:
+                        this.updateMsg("", body);
+                        break;
+                    case IrcReplyParser.RID_JOIN:
+                        this.updateMsg(channel, " * join " + channel);
+                        break;
+                    case IrcReplyParser.RID_PRIVMSG:
+                        this.updateMsg(channel, "<" + from + "> " + body);
+                        break;
+                    case IrcReplyParser.RID_NAMES:
+                        this.updateMsg(channel, " * names " + body);
+                        this.updateUsers(channel, body);
+                        break;
+                    default:
+                        this.updateMsg("", current);
+                        break;
                 }
-                Thread.sleep(100);
             }
         } catch (UnknownHostException e) {
             Util.d(e.getMessage());
         } catch (IOException e) {
-            Util.d(e.getMessage());
-        } catch (InterruptedException e) {
             Util.d(e.getMessage());
         } finally {
             // 切断
