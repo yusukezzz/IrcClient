@@ -14,6 +14,7 @@ import android.widget.TextView.BufferType;
 
 public class EditHost extends Activity {
     // edit host view
+    private EditText settingname;
     private EditText hostname;
     private CheckBox use_ssl;
     private EditText port;
@@ -56,6 +57,7 @@ public class EditHost extends Activity {
         setContentView(R.layout.edit_host);
 
         // 要素の用意
+        settingname = (EditText) findViewById(R.id.edithost_setting_name);
         hostname = (EditText) findViewById(R.id.edithost_hostname);
         use_ssl = (CheckBox) findViewById(R.id.edithost_use_ssl);
         port = (EditText) findViewById(R.id.edithost_port);
@@ -73,6 +75,7 @@ public class EditHost extends Activity {
         if (host_no != -1) {
             try {
                 IrcHost host = HostList.getHost(host_no);
+                hostname.setText(host.getSettingName(), BufferType.NORMAL);
                 hostname.setText(host.getHostName(), BufferType.NORMAL);
                 use_ssl.setChecked(host.getUseSSL());
                 port.setText(host.getPort(), BufferType.NORMAL);
@@ -97,10 +100,10 @@ public class EditHost extends Activity {
                         HostList.removeHost(host_no);
                     }
                     // 追加
-                    HostList.addHost(new IrcHost(hostname.getText().toString(),
-                            use_ssl.isChecked(), Integer.parseInt(port.getText().toString()), pass
-                                    .getText().toString(), nick.getText().toString(), login
-                                    .getText().toString(), real.getText().toString(),
+                    HostList.addHost(new IrcHost(settingname.getText().toString(), hostname
+                            .getText().toString(), use_ssl.isChecked(), Integer.parseInt(port
+                            .getText().toString()), pass.getText().toString(), nick.getText()
+                            .toString(), login.getText().toString(), real.getText().toString(),
                             getCharset(pos)));
                 } catch (Exception e) {
                     Util.d(e.getMessage());

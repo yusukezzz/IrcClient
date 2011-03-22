@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class IrcHost extends Thread {
+    private String SETTING_NAME;
     private String                      HOST;
     private boolean                     USE_SSL;
     private int                         PORT;
@@ -35,8 +36,9 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels     = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String host, boolean use_ssl, int port, String pass, String nick, String login,
+    public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass, String nick, String login,
             String real, String charset) {
+        SETTING_NAME = setting_name;
         HOST = host;
         USE_SSL = use_ssl;
         PORT = port;
@@ -175,6 +177,9 @@ public class IrcHost extends Thread {
         }
     }
 
+    public String getSettingName() {
+        return SETTING_NAME;
+    }
     /**
      * ホスト名を返す
      * @return String
@@ -367,7 +372,8 @@ public class IrcHost extends Thread {
     public JSONObject toJson() {
         JSONObject jsobj = new JSONObject();
         try {
-            jsobj.put("name", HOST);
+            jsobj.put("settingname", SETTING_NAME);
+            jsobj.put("hostname", HOST);
             jsobj.put("use_ssl", USE_SSL);
             jsobj.put("port", PORT);
             jsobj.put("pass", PASS);

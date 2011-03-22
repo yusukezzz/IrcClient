@@ -75,7 +75,7 @@ public class HostList extends ListActivity {
     }
 
     private IrcHost getHostByJsobj(JSONObject jsobj) throws JSONException {
-        return new IrcHost(jsobj.getString("name"), jsobj.getBoolean("use_ssl"),
+        return new IrcHost(jsobj.getString("setting_name"), jsobj.getString("hostname"), jsobj.getBoolean("use_ssl"),
                 jsobj.getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"),
                 jsobj.getString("login"), jsobj.getString("real"), jsobj.getString("charset"));
     }
