@@ -44,7 +44,7 @@ public class IrcClient extends Activity {
         try {
             setContentView(R.layout.channel_with_user_list);
         } catch (Exception e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
         // channelの部品準備
         title = (TextView) findViewById(R.id.title);

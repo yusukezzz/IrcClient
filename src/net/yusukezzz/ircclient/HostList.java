@@ -27,6 +27,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class HostList extends ListActivity {
     // Activity request code
@@ -63,9 +64,13 @@ public class HostList extends ListActivity {
                 IrcHost host = this.getHostByJsobj(jsobj);
                 hosts.add(host);
             } catch (JSONException e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
             }
         }
+
+        // ConnectionService開始
+        Intent intent = new Intent(this, IrcConnectionService.class);
+        startService(intent);
 
         // アダプターにセット
         adapter = new HostAdapter(getApplicationContext(), R.layout.host_list_row, hosts);
@@ -75,9 +80,10 @@ public class HostList extends ListActivity {
     }
 
     private IrcHost getHostByJsobj(JSONObject jsobj) throws JSONException {
-        return new IrcHost(jsobj.getString("setting_name"), jsobj.getString("hostname"), jsobj.getBoolean("use_ssl"),
-                jsobj.getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"),
-                jsobj.getString("login"), jsobj.getString("real"), jsobj.getString("charset"));
+        return new IrcHost(jsobj.getString("setting_name"), jsobj.getString("hostname"),
+                jsobj.getBoolean("use_ssl"), jsobj.getInt("port"), jsobj.getString("pass"),
+                jsobj.getString("nick"), jsobj.getString("login"), jsobj.getString("real"),
+                jsobj.getString("charset"));
     }
 
     private void showChannel() {
@@ -90,6 +96,7 @@ public class HostList extends ListActivity {
      */
     @Override
     protected void onListItemClick(ListView l, View v, int pos, long id) {
+        Toast.makeText(this, "hoge", Toast.LENGTH_SHORT);
         super.onListItemClick(l, v, pos, id);
         IrcHost host = hosts.get(pos);
         if (!host.isConnected()) {
@@ -140,8 +147,7 @@ public class HostList extends ListActivity {
                 try {
                     hosts.set(pos, this.getHostByJsobj(json.getJSONObject(pos)));
                 } catch (JSONException e) {
-                    // TODO 自動生成された catch ブロック
-                    e.printStackTrace();
+                    Util.d(e.getStackTrace());
                 }
                 updateList();
                 break;
@@ -210,6 +216,9 @@ public class HostList extends ListActivity {
             }
             hosts = null;
         }
+        // ConnectionService停止
+        Intent intent = new Intent(this, IrcConnectionService.class);
+        stopService(intent);
         super.onDestroy();
     }
 
@@ -250,7 +259,7 @@ public class HostList extends ListActivity {
         try {
             host = hosts.get(pos);
         } catch (Exception e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
         return host;
     }
@@ -289,7 +298,7 @@ public class HostList extends ListActivity {
                 hosts.remove(host_no);
                 updateJson();
             } catch (Exception e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
             }
         }
     }
@@ -328,9 +337,9 @@ public class HostList extends ListActivity {
                 // ファイルがなければ空のJSON
                 return json = new JSONArray();
             } catch (IOException e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
             } catch (JSONException e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
             }
             return json;
         }
@@ -341,10 +350,10 @@ public class HostList extends ListActivity {
                 fos.write(src.getBytes());
                 fos.close();
             } catch (FileNotFoundException e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
                 return false;
             } catch (IOException e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
                 return false;
             }
             return true;
@@ -373,7 +382,7 @@ public class HostList extends ListActivity {
             }
             IrcHost host = hosts.get(position);
             TextView textView = (TextView) view.findViewById(R.id.hostlist_row_title);
-            textView.setText(host.getHostName());
+            textView.setText(host.getSettingName());
             TextView connectivity = (TextView) view.findViewById(R.id.connectivity);
             // 接続状態を表示
             if (host.isConnected()) {

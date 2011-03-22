@@ -30,4 +30,10 @@ public class Util {
     public static void d(String str) {
         Log.d("IRC", str);
     }
+
+    public static void d(StackTraceElement[] stackTrace) {
+        for (StackTraceElement e: stackTrace) {
+            Log.d("IRC", e.getFileName() + ":" + e.getLineNumber() + " " + e.getMethodName());
+        }
+    }
 }

@@ -85,7 +85,7 @@ public class EditHost extends Activity {
                 real.setText(host.getReal(), BufferType.NORMAL);
                 charspn.setSelection(getCharsetsPos(host.getCharset()));
             } catch (Exception e) {
-                Util.d(e.getMessage());
+                Util.d(e.getStackTrace());
             }
         }
 
@@ -106,7 +106,7 @@ public class EditHost extends Activity {
                             .toString(), login.getText().toString(), real.getText().toString(),
                             getCharset(pos)));
                 } catch (Exception e) {
-                    Util.d(e.getMessage());
+                    Util.d(e.getStackTrace());
                 }
                 // ホスト一覧に戻る
                 setResult(RESULT_OK);

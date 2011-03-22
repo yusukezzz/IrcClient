@@ -59,11 +59,11 @@ public class IrcHost extends Thread {
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
         } catch (UnsupportedEncodingException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         } catch (UnknownHostException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         } catch (IOException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
         running = true;
         this.start();
@@ -91,7 +91,7 @@ public class IrcHost extends Thread {
                 socket.close();
             }
         } catch (IOException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
     }
 
@@ -107,7 +107,7 @@ public class IrcHost extends Thread {
             // thread 停止待ち
             this.join();
         } catch (InterruptedException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
     }
 
@@ -151,9 +151,9 @@ public class IrcHost extends Thread {
                 }
             }
         } catch (UnknownHostException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         } catch (IOException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         } finally {
             // 切断
             this.disconnect();
@@ -277,7 +277,7 @@ public class IrcHost extends Thread {
         try {
             hostname = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
         this.write("USER " + LOGIN + " " + hostname + " " + HOST + " :" + REAL);
     }
@@ -341,7 +341,7 @@ public class IrcHost extends Thread {
             bw.write(cmd + "\n");
             bw.flush();
         } catch (IOException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
     }
 
@@ -372,7 +372,7 @@ public class IrcHost extends Thread {
     public JSONObject toJson() {
         JSONObject jsobj = new JSONObject();
         try {
-            jsobj.put("settingname", SETTING_NAME);
+            jsobj.put("setting_name", SETTING_NAME);
             jsobj.put("hostname", HOST);
             jsobj.put("use_ssl", USE_SSL);
             jsobj.put("port", PORT);
@@ -382,7 +382,7 @@ public class IrcHost extends Thread {
             jsobj.put("real", REAL);
             jsobj.put("charset", CHARSET);
         } catch (JSONException e) {
-            Util.d(e.getMessage());
+            Util.d(e.getStackTrace());
         }
         return jsobj;
     }
