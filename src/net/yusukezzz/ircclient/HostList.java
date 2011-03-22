@@ -27,7 +27,6 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class HostList extends ListActivity {
     // Activity request code
@@ -96,7 +95,6 @@ public class HostList extends ListActivity {
      */
     @Override
     protected void onListItemClick(ListView l, View v, int pos, long id) {
-        Toast.makeText(this, "hoge", Toast.LENGTH_SHORT);
         super.onListItemClick(l, v, pos, id);
         IrcHost host = hosts.get(pos);
         if (!host.isConnected()) {
