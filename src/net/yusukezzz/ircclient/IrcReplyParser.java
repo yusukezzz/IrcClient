@@ -9,26 +9,22 @@ import java.util.regex.Pattern;
  */
 public class IrcReplyParser {
     // IRCリプライの内部ID
-    public static final int RID_UNKNOWN  = 255;
-    public static final int RID_SYSMSG   = 0;
-    public static final int RID_PING     = 1;
-    public static final int RID_JOIN     = 2;
-    public static final int RID_PRIVMSG  = 3;
-    public static final int RID_NAMES    = 4;
-    public static final int RID_MOTD     = 5;
+    public static final int RID_UNKNOWN = 255;
+    public static final int RID_SYSMSG = 0;
+    public static final int RID_PING = 1;
+    public static final int RID_JOIN = 2;
+    public static final int RID_PRIVMSG = 3;
+    public static final int RID_NAMES = 4;
+    public static final int RID_MOTD = 5;
     public static final int RID_END_MOTD = 6;
-    
+
     // IRCリプライの正規表現
-    static String[]         patterns;
+    static String[] patterns;
     static {
         patterns = new String[] {
-            " \\* :(.+)",
-            "^PING (:.+)",
-            "JOIN :(#.+)",
-            ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)",
-            "353.+(#.+) :(.+)",
-            "372 .+ :-(.+)",
-            "376 .+ :End",
+                " \\* :(.+)", "^PING (:.+)", "JOIN :(#.+)",
+                ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)", "353.+(#.+) :(.+)", "372 .+ :-(.+)",
+                "376 .+ :End",
         };
     }
 
@@ -99,7 +95,7 @@ public class IrcReplyParser {
                 results[0] = replyId + "";
                 // ヒットしたグループを詰める
                 for (int i = 1; i < groups; i++) {
-                    results[i] = matcher.group(i-1);
+                    results[i] = matcher.group(i - 1);
                 }
                 break;
             }

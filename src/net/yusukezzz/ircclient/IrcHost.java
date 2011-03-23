@@ -16,28 +16,28 @@ import org.json.JSONObject;
 
 public class IrcHost extends Thread {
     private String SETTING_NAME;
-    private String                      HOST;
-    private boolean                     USE_SSL;
-    private int                         PORT;
-    private String                      PASS;
-    private String                      NICK;
-    private String                      LOGIN;
-    private String                      REAL;
-    private String                      CHARSET;
+    private String HOST;
+    private boolean USE_SSL;
+    private int PORT;
+    private String PASS;
+    private String NICK;
+    private String LOGIN;
+    private String REAL;
+    private String CHARSET;
     // thread 稼働フラグ
-    private boolean                     running      = false;
-    private Socket                      socket       = null;
-    private BufferedWriter              bw;
-    private BufferedReader              br;
+    private boolean running = false;
+    private Socket socket = null;
+    private BufferedWriter bw;
+    private BufferedReader br;
     // ch指定のないテキストを格納
-    private String                      receive      = "";
+    private String receive = "";
     // 最後に表示されていたchannel
-    private IrcChannel                  last_channel = null;
+    private IrcChannel last_channel = null;
 
-    private HashMap<String, IrcChannel> channels     = new HashMap<String, IrcChannel>();
+    private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass, String nick, String login,
-            String real, String charset) {
+    public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass,
+            String nick, String login, String real, String charset) {
         SETTING_NAME = setting_name;
         HOST = host;
         USE_SSL = use_ssl;
@@ -180,6 +180,7 @@ public class IrcHost extends Thread {
     public String getSettingName() {
         return SETTING_NAME;
     }
+
     /**
      * ホスト名を返す
      * @return String

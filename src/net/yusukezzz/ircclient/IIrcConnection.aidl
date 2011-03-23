@@ -1,6 +1,6 @@
 package net.yusukezzz.ircclient;
 
 interface IIrcConnection {
-    boolean addHost(String hostname, String nick, String user, String real,
-                String charset);
+    boolean addHost(String setting, String host, int port, String pass, String nick, String login, String real, String charset);
+    boolean connectHost(String setting);
 }

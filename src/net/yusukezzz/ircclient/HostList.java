@@ -33,29 +33,29 @@ import android.widget.TextView;
 
 public class HostList extends ListActivity {
     // Activity request code
-    public static final int           SHOW_CHANNEL    = 0;
-    public static final int           SHOW_EDITHOST   = 1;
+    public static final int SHOW_CHANNEL = 0;
+    public static final int SHOW_EDITHOST = 1;
     // Context Menu Items id
-    private static final int          MENU_CONNECT    = Menu.FIRST;
-    private static final int          MENU_DISCONNECT = Menu.FIRST + 1;
-    private static final int          MENU_EDITHOST   = Menu.FIRST + 2;
-    private static final int          MENU_REMOVEHOST = Menu.FIRST + 3;
+    private static final int MENU_CONNECT = Menu.FIRST;
+    private static final int MENU_DISCONNECT = Menu.FIRST + 1;
+    private static final int MENU_EDITHOST = Menu.FIRST + 2;
+    private static final int MENU_REMOVEHOST = Menu.FIRST + 3;
 
-    public static IrcHost             currentHost     = null;
-    public static IrcChannel          currentCh       = null;
-    private static ArrayList<IrcHost> hosts           = null;
-    public static final String        HOSTS_FILE      = "hosts.json";
-    private JSONArray                 json;
-    private static MyJson             myjson          = null;
-    private HostAdapter               adapter;
-    
-    private IIrcConnection binder;
+    public static IrcHost currentHost = null;
+    public static IrcChannel currentCh = null;
+    private static ArrayList<IrcHost> hosts = null;
+    public static final String HOSTS_FILE = "hosts.json";
+    private JSONArray json;
+    private static MyJson myjson = null;
+    private HostAdapter adapter;
+
+    private IIrcConnection IrcConnectionIf;
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceDisconnected(ComponentName name) {
         }
-        
+
         public void onServiceConnected(ComponentName name, IBinder service) {
-            binder = IIrcConnection.Stub.asInterface(service);
+            IrcConnectionIf = IIrcConnection.Stub.asInterface(service);
         }
     };
 
@@ -81,8 +81,8 @@ public class HostList extends ListActivity {
         }
 
         // ConnectionService開始
-        Intent intent = new Intent(this, IrcConnection.class);
         unbindService(conn);
+        Intent intent = new Intent(this, IrcConnection.class);
         bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
         // アダプターにセット
@@ -229,8 +229,7 @@ public class HostList extends ListActivity {
             hosts = null;
         }
         // ConnectionService停止
-        Intent intent = new Intent(this, IrcConnection.class);
-        stopService(intent);
+        unbindService(conn);
         super.onDestroy();
     }
 
@@ -376,7 +375,7 @@ public class HostList extends ListActivity {
      * HostListに詰められるデータ
      */
     public class HostAdapter extends ArrayAdapter<IrcHost> {
-        private List<IrcHost>  hosts;
+        private List<IrcHost> hosts;
         private LayoutInflater inflater;
 
         public HostAdapter(Context context, int resourceId, List<IrcHost> items) {

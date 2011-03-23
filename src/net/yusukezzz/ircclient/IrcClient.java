@@ -20,21 +20,21 @@ import android.widget.TextView;
 
 public class IrcClient extends Activity {
     // Menu item ID
-    private static final int MENU_ID_HOSTS   = (Menu.FIRST + 1);
-    private static final int MENU_ID_JOIN    = (Menu.FIRST + 2);
+    private static final int MENU_ID_HOSTS = (Menu.FIRST + 1);
+    private static final int MENU_ID_JOIN = (Menu.FIRST + 2);
 
-    private final int        UPDATE_INTERVAL = 1000;
-    private Handler          handler         = new Handler();
+    private final int UPDATE_INTERVAL = 1000;
+    private Handler handler = new Handler();
 
     // channel view
-    private TextView         title;
-    private TextView         recieve;
-    private EditText         sendtxt;
-    private Button           postbtn;
-    private ListView         user_list;
-    private UserListAdapter  adapter;
+    private TextView title;
+    private TextView recieve;
+    private EditText sendtxt;
+    private Button postbtn;
+    private ListView user_list;
+    private UserListAdapter adapter;
 
-    private ArrayList<User>  users           = new ArrayList<User>();
+    private ArrayList<User> users = new ArrayList<User>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -3,9 +3,9 @@ package net.yusukezzz.ircclient;
 import java.util.ArrayList;
 
 public class IrcChannel {
-    private ArrayList<User> users   = new ArrayList<User>();
-    private String          ch_name;
-    private String          recieve = "";
+    private ArrayList<User> users = new ArrayList<User>();
+    private String ch_name;
+    private String recieve = "";
 
     public IrcChannel(String ch) {
         this.setName(ch);

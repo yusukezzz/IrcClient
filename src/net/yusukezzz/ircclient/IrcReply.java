@@ -2,7 +2,7 @@ package net.yusukezzz.ircclient;
 
 public class IrcReply {
 
-    private int    id;
+    private int id;
     private String ch_name;
     private String body;
     private String from;

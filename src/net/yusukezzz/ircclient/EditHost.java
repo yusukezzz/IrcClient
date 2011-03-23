@@ -22,9 +22,9 @@ public class EditHost extends Activity {
     private EditText nick;
     private EditText login;
     private EditText real;
-    private Spinner  charspn;
-    private Button   edithostbtn;
-    private int      host_no = -1;
+    private Spinner charspn;
+    private Button edithostbtn;
+    private int host_no = -1;
 
     /**
      * 文字コードを返す
