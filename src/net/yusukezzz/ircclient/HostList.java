@@ -218,15 +218,6 @@ public class HostList extends ListActivity {
 
     @Override
     protected void onDestroy() {
-        if (hosts != null) {
-            // 接続しているhostがあったら切断
-            for (IrcHost host : hosts) {
-                if (host.isConnected()) {
-                    host.close();
-                }
-            }
-            hosts = null;
-        }
         // ConnectionService停止
         unbindService(conn);
         super.onDestroy();
