@@ -49,13 +49,13 @@ public class HostList extends ListActivity {
     private static MyJson myjson = null;
     private HostAdapter adapter;
 
-    private IIrcConnection IrcConnectionIf;
+    private IIrcConnectionService IrcConnServeIf;
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceDisconnected(ComponentName name) {
         }
 
         public void onServiceConnected(ComponentName name, IBinder service) {
-            IrcConnectionIf = IIrcConnection.Stub.asInterface(service);
+            IrcConnServeIf = IIrcConnectionService.Stub.asInterface(service);
         }
     };
 
@@ -82,7 +82,7 @@ public class HostList extends ListActivity {
 
         // ConnectionService開始
         unbindService(conn);
-        Intent intent = new Intent(this, IrcConnection.class);
+        Intent intent = new Intent(this, IrcConnectionService.class);
         bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
         // アダプターにセット

@@ -8,10 +8,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.Toast;
 
-public class IrcConnection extends Service {
+public class IrcConnectionService extends Service {
 
     private static Map<String, IrcHost> hosts = null;
-    private IIrcConnection.Stub binder = new IIrcConnection.Stub() {
+    private IIrcConnectionService.Stub binder = new IIrcConnectionService.Stub() {
         public boolean addHost(String setting, String host, int port, String pass, String nick, String login,
                 String real, String charset) throws RemoteException {
             hosts.put(setting, new IrcHost(setting, host, false, port, pass, nick, login, real, charset));
@@ -35,7 +35,7 @@ public class IrcConnection extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (IrcConnection.class.getName().equals(intent.getAction())) {
+        if (IrcConnectionService.class.getName().equals(intent.getAction())) {
             return binder;
         }
         return null;
@@ -51,5 +51,9 @@ public class IrcConnection extends Service {
     public void onDestroy() {
         Toast.makeText(this, "IrcConnection has been terminated.", Toast.LENGTH_SHORT).show();
         super.onDestroy();
+    }
+    
+    class IrcConnection extends Thread {
+        
     }
 }
