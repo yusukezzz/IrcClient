@@ -51,11 +51,9 @@ public class HostList extends ListActivity {
     
     private IIrcConnection binder;
     private ServiceConnection conn = new ServiceConnection() {
-        @Override
         public void onServiceDisconnected(ComponentName name) {
         }
         
-        @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             binder = IIrcConnection.Stub.asInterface(service);
         }

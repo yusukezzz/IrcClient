@@ -9,7 +9,6 @@ import android.widget.Toast;
 public class IrcConnection extends Service {
 
     private IIrcConnection.Stub binder = new IIrcConnection.Stub() {
-        @Override
         public boolean addHost(String hostname, String nick, String user, String real,
                 String charset) throws RemoteException {
             return true;
