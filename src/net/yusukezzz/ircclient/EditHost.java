@@ -100,11 +100,10 @@ public class EditHost extends Activity {
                         HostList.removeHost(host_no);
                     }
                     // 追加
-                    HostList.addHost(new IrcHost(settingname.getText().toString(), hostname
-                            .getText().toString(), use_ssl.isChecked(), Integer.parseInt(port
-                            .getText().toString()), pass.getText().toString(), nick.getText()
-                            .toString(), login.getText().toString(), real.getText().toString(),
-                            getCharset(pos)));
+                    HostList.addHost(new IrcHost(settingname.getText().toString(), hostname.getText().toString(),
+                            use_ssl.isChecked(), Integer.parseInt(port.getText().toString()),
+                            pass.getText().toString(), nick.getText().toString(), login.getText().toString(), real
+                                    .getText().toString(), getCharset(pos)));
                 } catch (Exception e) {
                     Util.d(e.getStackTrace());
                 }

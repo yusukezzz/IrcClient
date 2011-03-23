@@ -36,8 +36,8 @@ public class IrcHost extends Thread {
 
     private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
-    public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass,
-            String nick, String login, String real, String charset) {
+    public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass, String nick, String login,
+            String real, String charset) {
         SETTING_NAME = setting_name;
         HOST = host;
         USE_SSL = use_ssl;

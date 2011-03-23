@@ -22,9 +22,8 @@ public class IrcReplyParser {
     static String[] patterns;
     static {
         patterns = new String[] {
-                " \\* :(.+)", "^PING (:.+)", "JOIN :(#.+)",
-                ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)", "353.+(#.+) :(.+)", "372 .+ :-(.+)",
-                "376 .+ :End",
+                " \\* :(.+)", "^PING (:.+)", "JOIN :(#.+)", ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)",
+                "353.+(#.+) :(.+)", "372 .+ :-(.+)", "376 .+ :End",
         };
     }
 

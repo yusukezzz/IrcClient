@@ -12,10 +12,9 @@ public class IrcConnection extends Service {
 
     private static Map<String, IrcHost> hosts = null;
     private IIrcConnection.Stub binder = new IIrcConnection.Stub() {
-        public boolean addHost(String setting, String host, int port, String pass, String nick,
-                String login, String real, String charset) throws RemoteException {
-            hosts.put(setting, new IrcHost(setting, host, false, port, pass, nick, login, real,
-                    charset));
+        public boolean addHost(String setting, String host, int port, String pass, String nick, String login,
+                String real, String charset) throws RemoteException {
+            hosts.put(setting, new IrcHost(setting, host, false, port, pass, nick, login, real, charset));
             return true;
         }
 
