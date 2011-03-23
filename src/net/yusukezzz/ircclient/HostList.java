@@ -12,10 +12,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -45,6 +48,18 @@ public class HostList extends ListActivity {
     private JSONArray                 json;
     private static MyJson             myjson          = null;
     private HostAdapter               adapter;
+    
+    private IIrcConnection binder;
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+        
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            binder = IIrcConnection.Stub.asInterface(service);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,8 +83,9 @@ public class HostList extends ListActivity {
         }
 
         // ConnectionService開始
-        Intent intent = new Intent(this, IrcConnectionService.class);
-        startService(intent);
+        Intent intent = new Intent(this, IrcConnection.class);
+        unbindService(conn);
+        bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
         // アダプターにセット
         adapter = new HostAdapter(getApplicationContext(), R.layout.host_list_row, hosts);
@@ -215,7 +231,7 @@ public class HostList extends ListActivity {
             hosts = null;
         }
         // ConnectionService停止
-        Intent intent = new Intent(this, IrcConnectionService.class);
+        Intent intent = new Intent(this, IrcConnection.class);
         stopService(intent);
         super.onDestroy();
     }
