@@ -3,7 +3,6 @@ package net.yusukezzz.ircclient;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -12,6 +11,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView.BufferType;
 
+/**
+ * ホストの設定を編集する画面のクラス
+ * @author yusuke
+ *
+ */
 public class EditHost extends Activity {
     // edit host view
     private EditText settingname;
@@ -94,7 +98,6 @@ public class EditHost extends Activity {
             public void onClick(View v) {
                 try {
                     int pos = (int) charspn.getSelectedItemId();
-                    Log.d("IRC", pos + "=" + getCharset(pos));
                     // 更新の場合は削除してから追加
                     if (host_no != -1) {
                         HostList.removeHost(host_no);

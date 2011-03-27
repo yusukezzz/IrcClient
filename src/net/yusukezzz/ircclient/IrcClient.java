@@ -67,7 +67,7 @@ public class IrcClient extends Activity {
         Runnable looper = new Runnable() {
             public void run() {
                 if (HostList.currentHost != null) {
-                    String str = HostList.currentCh == null ? HostList.currentHost.getRecieve() : HostList.currentCh
+                    String str = HostList.currentCh == null ? HostList.currentHost.connection().getRecieve() : HostList.currentCh
                             .getRecieve();
                     recieve.setText(str);
                     updateTitle();
@@ -126,7 +126,7 @@ public class IrcClient extends Activity {
                 dialog.setPositiveButton("join", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String ch = edit.getText().toString();
-                        HostList.setCurrentCh(HostList.currentHost.join(ch));
+                        HostList.setCurrentCh(HostList.currentHost.connection().join(ch));
                     }
                 });
                 dialog.setNegativeButton("cancel", null);
@@ -171,7 +171,7 @@ public class IrcClient extends Activity {
      */
     private void postText(String text) {
         if (HostList.currentHost != null && HostList.currentCh != null) {
-            HostList.currentHost.privmsg(HostList.currentCh.getName(), text);
+            HostList.currentHost.connection().privmsg(HostList.currentCh.getName(), text);
             sendtxt.setText("");
         }
     }

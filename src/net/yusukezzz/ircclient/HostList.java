@@ -31,6 +31,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * ホスト一覧を描画するクラス
+ * @author yusuke
+ */
 public class HostList extends ListActivity {
     // Activity request code
     public static final int SHOW_CHANNEL = 0;
@@ -48,14 +52,19 @@ public class HostList extends ListActivity {
     private JSONArray json;
     private static MyJson myjson = null;
     private HostAdapter adapter;
+    private boolean mIsBind = false;
 
-    private IIrcConnectionService IrcConnServeIf;
-    private ServiceConnection conn = new ServiceConnection() {
+    private static IrcConnectionService localService = null;
+
+    private ServiceConnection mServConn = new ServiceConnection() {
+
         public void onServiceDisconnected(ComponentName name) {
+            localService = null;
         }
 
         public void onServiceConnected(ComponentName name, IBinder service) {
-            IrcConnServeIf = IIrcConnectionService.Stub.asInterface(service);
+            localService = ((IrcConnectionService.LocalBinder) service).getService();
+            mIsBind = true;
         }
     };
 
@@ -80,16 +89,21 @@ public class HostList extends ListActivity {
             }
         }
 
-        // ConnectionService開始
-        unbindService(conn);
-        Intent intent = new Intent(this, IrcConnectionService.class);
-        bindService(intent, conn, Context.BIND_AUTO_CREATE);
-
         // アダプターにセット
         adapter = new HostAdapter(getApplicationContext(), R.layout.host_list_row, hosts);
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
+    }
+
+    @Override
+    protected void onResume() {
+        // IrcConnectionService開始
+        if (mIsBind == false) {
+            Intent intent = new Intent(this, IrcConnectionService.class);
+            bindService(intent, mServConn, Context.BIND_AUTO_CREATE);
+        }
+        super.onResume();
     }
 
     private IrcHost getHostByJsobj(JSONObject jsobj) throws JSONException {
@@ -110,8 +124,8 @@ public class HostList extends ListActivity {
     protected void onListItemClick(ListView l, View v, int pos, long id) {
         super.onListItemClick(l, v, pos, id);
         IrcHost host = hosts.get(pos);
-        if (!host.isConnected()) {
-            host.connect();
+        if (host.connection().isConnected() == false) {
+            host.connection().connect();
         }
         setCurrentHost(host);
         showChannel();
@@ -129,7 +143,7 @@ public class HostList extends ListActivity {
         // hostを取得
         IrcHost host = hosts.get(pos);
         // 接続状況で表示切替
-        if (!host.isConnected()) {
+        if (!host.connection().isConnected()) {
             menu.add(Menu.NONE, MENU_CONNECT, Menu.NONE, "connect");
         } else {
             menu.add(Menu.NONE, MENU_DISCONNECT, Menu.NONE, "disconnect");
@@ -149,12 +163,12 @@ public class HostList extends ListActivity {
         IrcHost host = hosts.get(pos);
         switch (item.getItemId()) {
             case MENU_CONNECT:
-                host.connect();
+                host.connection().connect();
                 setCurrentHost(host);
                 showChannel();
                 break;
             case MENU_DISCONNECT:
-                host.close();
+                host.connection().close();
                 try {
                     hosts.set(pos, this.getHostByJsobj(json.getJSONObject(pos)));
                 } catch (JSONException e) {
@@ -219,7 +233,7 @@ public class HostList extends ListActivity {
     @Override
     protected void onDestroy() {
         // ConnectionService停止
-        unbindService(conn);
+        unbindService(mServConn);
         super.onDestroy();
     }
 
@@ -229,7 +243,7 @@ public class HostList extends ListActivity {
      */
     public static void setCurrentHost(IrcHost host) {
         currentHost = host;
-        currentCh = host.getLastChannel();
+        currentCh = currentHost.getLastChannel();
     }
 
     /**
@@ -259,7 +273,7 @@ public class HostList extends ListActivity {
         IrcHost host = null;
         try {
             host = hosts.get(pos);
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             Util.d(e.getStackTrace());
         }
         return host;
@@ -280,6 +294,7 @@ public class HostList extends ListActivity {
     public static void addHost(IrcHost host) {
         if (host != null) {
             hosts.add(host);
+            host.setConnection(localService.addHost(host));
             updateJson();
         }
     }
@@ -292,8 +307,8 @@ public class HostList extends ListActivity {
         if (!hosts.isEmpty()) {
             try {
                 IrcHost host = hosts.get(host_no);
-                if (host.isConnected()) {
-                    host.close();
+                if (host.connection().isConnected()) {
+                    host.connection().close();
                 }
                 // 削除
                 hosts.remove(host_no);
@@ -386,12 +401,13 @@ public class HostList extends ListActivity {
             textView.setText(host.getSettingName());
             TextView connectivity = (TextView) view.findViewById(R.id.connectivity);
             // 接続状態を表示
-            if (host.isConnected()) {
-                connectivity.setText("Connected");
-                connectivity.setTextColor(Color.GREEN);
-            } else {
-                connectivity.setText("Disconnected");
-                connectivity.setTextColor(Color.RED);
+            connectivity.setText("Disconnected");
+            connectivity.setTextColor(Color.RED);
+            if (host.connection() != null) {
+                if (host.connection().isConnected()) {
+                    connectivity.setText("Connected");
+                    connectivity.setTextColor(Color.GREEN);
+                }
             }
             return view;
         }

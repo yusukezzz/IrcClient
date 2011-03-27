@@ -9,92 +9,99 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.widget.Toast;
 
+/**
+ * バックグラウンドで IrcServer と通信を行うクラス
+ * @author yusuke
+ */
 public class IrcConnectionService extends Service {
 
-    private static ArrayList<IrcConnection> conns = null;
-    private IIrcConnectionService.Stub binder = new IIrcConnectionService.Stub() {
-        /**
-         * IrcConnectionを生成、IDを返す
-         */
-        public int addHost(String setting, String host, int port, String pass, String nick, String login, String real,
-                String charset) throws RemoteException {
-            IrcConnection con = new IrcConnection(setting, host, false, port, pass, nick, login, real, charset);
-            conns.add(con);
-            int id = conns.indexOf(con);
-            return id;
+    private static HashMap<String, IrcConnection> conns = new HashMap<String, IrcConnection>();
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        IrcConnectionService getService() {
+            return IrcConnectionService.this;
         }
-        /**
-         * IrcConnectionの接続を開始する
-         * @param id
-         * @return boolean
-         * @throws RemoteException
-         */
-        public boolean connectHost(int id) throws RemoteException {
-            IrcConnection conn = null;
-            try {
-                conn = conns.get(id);
-            } catch (IndexOutOfBoundsException e) {
-                return false;
-            }
-            conn.connect();
-            return true;
+    }
+
+    /**
+     * IrcConnrctionを追加
+     * @param IrcHost
+     * @return boolean
+     * @throws RemoteException
+     */
+    public IrcConnection addHost(IrcHost host) {
+        IrcConnection conn = new IrcConnection(host);
+        conns.put(host.getSettingName(), conn);
+        return conn;
+    }
+
+    /**
+     * 指定されたIrcConnectionを停止後、削除
+     * @param setting
+     * @return boolean
+     */
+    public boolean removeHost(String setting) {
+        IrcConnection conn = getConnection(setting);
+        if (conn == null) {
+            return false;
         }
-    };
+        conn.close();
+        conns.remove(setting);
+        return true;
+    }
+
+    /**
+     * 指定されたIrcConnectionを返す
+     * @param index
+     * @return IrcConnection
+     */
+    public IrcConnection getConnection(String setting) {
+        return conns.get(setting);
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Toast.makeText(this, "start service", Toast.LENGTH_SHORT);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (IrcConnectionService.class.getName().equals(intent.getAction())) {
-            return binder;
-        }
-        return null;
+        return mBinder;
     }
 
-    @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
-        Toast.makeText(this, "IrcConnection has been started.", Toast.LENGTH_SHORT).show();
-    }
-
+    @SuppressWarnings("rawtypes")
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "IrcConnection has been terminated.", Toast.LENGTH_SHORT).show();
         if (conns != null) {
             // 接続しているhostがあったら切断
-            for (IrcConnection conn : conns) {
+            Iterator<?> ite = conns.entrySet().iterator();
+            while (ite.hasNext()) {
+                Map.Entry obj = (Map.Entry) ite.next();
+                IrcConnection conn = (IrcConnection) obj.getValue();
                 if (conn.isConnected()) {
                     conn.close();
                 }
             }
             conns = null;
         }
+        Toast.makeText(this, "IrcConnection has been terminated.", Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
 
     class IrcConnection extends Thread {
-        private String SETTING_NAME;
-        private String HOST;
-        private boolean USE_SSL;
-        private int PORT;
-        private String PASS;
-        private String NICK;
-        private String LOGIN;
-        private String REAL;
-        private String CHARSET;
+        private IrcHost host;
         // ch指定のないテキストを格納
         private String receive = "";
         // 最後に表示されていたchannel
@@ -105,18 +112,9 @@ public class IrcConnectionService extends Service {
         private BufferedWriter bw;
         private BufferedReader br;
         private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
-        
-        public IrcConnection(String setting, String host, boolean use_ssl, int port, String pass, String nick, String login,
-                String real, String charset) {
-            SETTING_NAME = setting;
-            HOST = host;
-            USE_SSL = use_ssl;
-            PORT = port;
-            PASS = pass;
-            NICK = nick;
-            LOGIN = login;
-            REAL = real;
-            CHARSET = charset;
+
+        public IrcConnection(IrcHost host) {
+            this.host = host;
         }
 
         /**
@@ -124,10 +122,10 @@ public class IrcConnectionService extends Service {
          */
         public void connect() {
             try {
-                this.updateMsg("", this.HOST + " connecting...");
-                socket = new Socket(this.HOST, this.PORT);
+                this.updateMsg("", host.getHostName() + " connecting...");
+                socket = new Socket(host.getHostName(), Integer.parseInt(host.getPort()));
                 bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                br = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
+                br = new BufferedReader(new InputStreamReader(socket.getInputStream(), host.getCharset()));
             } catch (UnsupportedEncodingException e) {
                 Util.d(e.getStackTrace());
             } catch (UnknownHostException e) {
@@ -137,10 +135,10 @@ public class IrcConnectionService extends Service {
             }
             running = true;
             this.start();
-            if (PASS != "") {
-                this.pass(PASS);
+            if (host.getPassword() != "") {
+                this.pass(host.getPassword());
             }
-            this.changeNick(NICK);
+            this.changeNick(host.getNick());
             this.user();
         }
 
@@ -280,7 +278,7 @@ public class IrcConnectionService extends Service {
             } catch (UnknownHostException e) {
                 Util.d(e.getStackTrace());
             }
-            this.write("USER " + LOGIN + " " + hostname + " " + HOST + " :" + REAL);
+            this.write("USER " + host.getLogin() + " " + hostname + " " + host.getHostName() + " :" + host.getReal());
         }
 
         /**
@@ -339,7 +337,7 @@ public class IrcConnectionService extends Service {
          */
         public void privmsg(String ch, String str) {
             this.write("PRIVMSG " + ch + " " + str);
-            this.updateMsg(ch, "<" + NICK + "> " + str);
+            this.updateMsg(ch, "<" + host.getNick() + "> " + str);
         }
 
         /**
@@ -378,6 +376,22 @@ public class IrcConnectionService extends Service {
         private void updateUsers(String ch_name, String users) {
             IrcChannel ch = getChannel(ch_name);
             ch.updateUsers(users);
+        }
+
+        /**
+         * 最後に表示されたchannelを返す
+         * @return IrcChannel
+         */
+        public IrcChannel getLastChannel() {
+            return last_channel;
+        }
+
+        /**
+         * 受信したテキストを返す
+         * @return　String
+         */
+        public String getRecieve() {
+            return receive;
         }
     }
 }

@@ -1,20 +1,19 @@
 package net.yusukezzz.ircclient;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
+
+import net.yusukezzz.ircclient.IrcConnectionService.IrcConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * ホストの設定と接続　IrcConnection　を保持するクラス
+ * @author yusuke
+ *
+ */
 public class IrcHost {
+    private IrcConnection connection = null;
     private String SETTING_NAME;
     private String HOST;
     private boolean USE_SSL;
@@ -24,10 +23,10 @@ public class IrcHost {
     private String LOGIN;
     private String REAL;
     private String CHARSET;
-    // ch指定のないテキストを格納
-    private String receive = "";
     // 最後に表示されていたchannel
     private IrcChannel last_channel = null;
+
+    private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
     public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass, String nick, String login,
             String real, String charset) {
@@ -41,15 +40,19 @@ public class IrcHost {
         REAL = real;
         CHARSET = charset;
     }
+    
+    public void setConnection(IrcConnection conn) {
+        connection = conn;
+    }
+    
+    public IrcConnection connection() {
+        return connection;
+    }
 
     public String getSettingName() {
         return SETTING_NAME;
     }
 
-    /**
-     * ホスト名を返す
-     * @return String
-     */
     public String getHostName() {
         return HOST;
     }
@@ -83,19 +86,20 @@ public class IrcHost {
     }
 
     /**
-     * 受信したテキストを返す
-     * @return　String
-     */
-    public String getRecieve() {
-        return receive;
-    }
-
-    /**
      * 最後に表示されたchannelを返す
      * @return IrcChannel
      */
     public IrcChannel getLastChannel() {
         return last_channel;
+    }
+
+    /**
+     * 指定したチャンネルのオブジェクトを返す
+     * @param name
+     * @return IrcChannel
+     */
+    public IrcChannel getChannel(String name) {
+        return channels.get(name);
     }
 
     /**

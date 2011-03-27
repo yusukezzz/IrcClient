@@ -17,7 +17,7 @@
             
 </intent-filter>
 </activity>
-<service android:name="IrcConnection"></service>
+<service android:name="IrcConnectionService"></service>
 </application>
     <uses-sdk android:minSdkVersion="4" />
 
