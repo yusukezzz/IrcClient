@@ -25,7 +25,7 @@ import android.widget.Toast;
  */
 public class IrcConnectionService extends Service {
 
-    private static HashMap<String, IrcConnection> conns = new HashMap<String, IrcConnection>();
+    private static HashMap<String, IrcConnection> conns = null;
     private final IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
@@ -73,7 +73,7 @@ public class IrcConnectionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(this, "start service", Toast.LENGTH_SHORT);
+        conns = new HashMap<String, IrcConnection>();
     }
 
     @Override
@@ -84,6 +84,7 @@ public class IrcConnectionService extends Service {
     @SuppressWarnings("rawtypes")
     @Override
     public void onDestroy() {
+        super.onDestroy();
         if (conns != null) {
             // 接続しているhostがあったら切断
             Iterator<?> ite = conns.entrySet().iterator();
@@ -97,7 +98,6 @@ public class IrcConnectionService extends Service {
             conns = null;
         }
         Toast.makeText(this, "IrcConnection has been terminated.", Toast.LENGTH_SHORT).show();
-        super.onDestroy();
     }
 
     class IrcConnection extends Thread {
@@ -336,7 +336,7 @@ public class IrcConnectionService extends Service {
          * @param str
          */
         public void privmsg(String ch, String str) {
-            this.write("PRIVMSG " + ch + " " + str);
+            this.write("PRIVMSG " + ch + " :" + str);
             this.updateMsg(ch, "<" + host.getNick() + "> " + str);
         }
 

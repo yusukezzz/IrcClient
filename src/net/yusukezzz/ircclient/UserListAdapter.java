@@ -4,7 +4,9 @@ import java.util.List;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
@@ -26,9 +28,20 @@ public class UserListAdapter extends ArrayAdapter<User> {
             // 1行分のviewを生成
             view = inflater.inflate(R.layout.user_list_row, null);
         }
-        User user = users.get(position);
+        final User user = users.get(position);
         TextView textView = (TextView) view.findViewById(R.id.user_list_row_name);
         textView.setText(user.getName());
+        textView.setClickable(true);
+        textView.setFocusable(true);
+        textView.setFocusableInTouchMode(true);
+        textView.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    IrcClient.setReplyName(user.getName());
+                }
+                return true;
+            }
+        });
         return view;
     }
 }

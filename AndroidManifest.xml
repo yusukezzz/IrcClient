@@ -2,16 +2,16 @@
 <manifest android:versionCode="1"
       android:versionName="1.0" package="net.yusukezzz.ircclient" xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
-        <activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="IrcClient">
+        <activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="IrcClient" android:configChanges="keyboard|keyboardHidden|orientation">
             
         
 
 </activity>
 
     
-<activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="EditHost">
+<activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name="EditHost" android:configChanges="keyboard|keyboardHidden|orientation">
 </activity>
-<activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name=".HostList"><intent-filter>
+<activity android:label="@string/app_name" android:windowSoftInputMode="adjustResize" android:name=".HostList" android:configChanges="keyboard|keyboardHidden|orientation"><intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             

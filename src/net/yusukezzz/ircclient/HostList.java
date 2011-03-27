@@ -76,8 +76,8 @@ public class HostList extends ListActivity {
         // host設定の読み込み
         myjson = new MyJson(getApplicationContext());
         json = myjson.readFile(HOSTS_FILE);
-        hosts = new ArrayList<IrcHost>();
         int host_num = json.length();
+        hosts = new ArrayList<IrcHost>();
         for (int i = 0; i < host_num; i++) {
             JSONObject jsobj;
             try {
@@ -94,15 +94,16 @@ public class HostList extends ListActivity {
         setListAdapter(adapter);
         // ロングタップメニュー登録
         registerForContextMenu(getListView());
-    }
-
-    @Override
-    protected void onResume() {
+        
         // IrcConnectionService開始
         if (mIsBind == false) {
             Intent intent = new Intent(this, IrcConnectionService.class);
             bindService(intent, mServConn, Context.BIND_AUTO_CREATE);
         }
+    }
+
+    @Override
+    protected void onResume() {
         super.onResume();
     }
 
@@ -110,6 +111,14 @@ public class HostList extends ListActivity {
         return new IrcHost(jsobj.getString("setting_name"), jsobj.getString("hostname"), jsobj.getBoolean("use_ssl"),
                 jsobj.getInt("port"), jsobj.getString("pass"), jsobj.getString("nick"), jsobj.getString("login"),
                 jsobj.getString("real"), jsobj.getString("charset"));
+    }
+    
+    /**
+     * Serviceを返す
+     * @return IrcConnectionService
+     */
+    public static IrcConnectionService getLocalService() {
+        return localService;
     }
 
     private void showChannel() {
@@ -243,7 +252,7 @@ public class HostList extends ListActivity {
      */
     public static void setCurrentHost(IrcHost host) {
         currentHost = host;
-        currentCh = currentHost.getLastChannel();
+        currentCh = currentHost.connection().getLastChannel();
     }
 
     /**
@@ -294,7 +303,6 @@ public class HostList extends ListActivity {
     public static void addHost(IrcHost host) {
         if (host != null) {
             hosts.add(host);
-            host.setConnection(localService.addHost(host));
             updateJson();
         }
     }

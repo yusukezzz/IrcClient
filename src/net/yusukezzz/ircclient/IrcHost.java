@@ -1,7 +1,5 @@
 package net.yusukezzz.ircclient;
 
-import java.util.HashMap;
-
 import net.yusukezzz.ircclient.IrcConnectionService.IrcConnection;
 
 import org.json.JSONException;
@@ -23,10 +21,6 @@ public class IrcHost {
     private String LOGIN;
     private String REAL;
     private String CHARSET;
-    // 最後に表示されていたchannel
-    private IrcChannel last_channel = null;
-
-    private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
 
     public IrcHost(String setting_name, String host, boolean use_ssl, int port, String pass, String nick, String login,
             String real, String charset) {
@@ -41,11 +35,10 @@ public class IrcHost {
         CHARSET = charset;
     }
     
-    public void setConnection(IrcConnection conn) {
-        connection = conn;
-    }
-    
     public IrcConnection connection() {
+        if (connection == null && HostList.getLocalService() != null) {
+            connection = HostList.getLocalService().addHost(this);
+        }
         return connection;
     }
 
@@ -83,23 +76,6 @@ public class IrcHost {
 
     public String getCharset() {
         return CHARSET;
-    }
-
-    /**
-     * 最後に表示されたchannelを返す
-     * @return IrcChannel
-     */
-    public IrcChannel getLastChannel() {
-        return last_channel;
-    }
-
-    /**
-     * 指定したチャンネルのオブジェクトを返す
-     * @param name
-     * @return IrcChannel
-     */
-    public IrcChannel getChannel(String name) {
-        return channels.get(name);
     }
 
     /**
