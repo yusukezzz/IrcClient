@@ -135,7 +135,7 @@ public class IrcConnectionService extends Service {
             }
             running = true;
             this.start();
-            if (host.getPassword() != "") {
+            if (host.getPassword().equals("") != false) {
                 this.pass(host.getPassword());
             }
             this.changeNick(host.getNick());
