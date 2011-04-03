@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * @author yusuke
  */
 public class IrcReplyParser {
-    // IRCリプライの内部ID
+    // IRCリプライの内部IDメッセージ
     public static final int RID_UNKNOWN = -1;
     public static final int RID_SYSMSG = 0;
     public static final int RID_PING = 1;
@@ -25,7 +25,7 @@ public class IrcReplyParser {
             {
                 " \\* :(.+)", // RID_SYSMSG
                 "^PING (:.+)", // RID_PING
-                "JOIN :(#.+)", // RID_JOIN
+                ":([a-zA-Z0-9_]+?)!.+? JOIN :(#.+)", // RID_JOIN
                 ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)", // RID_PRIVMSG
                 "353.+(#.+) :(.+)", // RID_NAMES
                 "372 .+ :-(.+)", // RID_MOTD
@@ -52,7 +52,7 @@ public class IrcReplyParser {
                     reply = new IrcReply(id, results[2], "");
                     break;
                 case RID_JOIN:
-                    reply = new IrcReply(id, results[2], results[3]);
+                    reply = new IrcReply(id, results[2], results[1], results[3]);
                     break;
                 case RID_PRIVMSG:
                     reply = new IrcReply(id, results[3], results[4], results[2]);
