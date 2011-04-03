@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  */
 public class IrcReplyParser {
     // IRCリプライの内部ID
-    public static final int RID_UNKNOWN = 255;
+    public static final int RID_UNKNOWN = -1;
     public static final int RID_SYSMSG = 0;
     public static final int RID_PING = 1;
     public static final int RID_JOIN = 2;
@@ -21,13 +21,16 @@ public class IrcReplyParser {
     // IRCリプライの正規表現
     static String[] patterns;
     static {
-        patterns = new String[] {
-                " \\* :(.+)", "^PING (:.+)", "JOIN :(#.+)", ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)",
-                "353.+(#.+) :(.+)", "372 .+ :-(.+)", "376 .+ :End",
-        };
-    }
-
-    public IrcReplyParser() {
+        patterns = new String[]
+            {
+                " \\* :(.+)", // RID_SYSMSG
+                "^PING (:.+)", // RID_PING
+                "JOIN :(#.+)", // RID_JOIN
+                ":([a-zA-Z0-9_]+?)!.+? PRIVMSG (#.+?) :(.+)", // RID_PRIVMSG
+                "353.+(#.+) :(.+)", // RID_NAMES
+                "372 .+ :-(.+)", // RID_MOTD
+                "376 .+ :End", // RID_END_MOTD
+            };
     }
 
     /**
@@ -38,27 +41,27 @@ public class IrcReplyParser {
     public static IrcReply parse(String msg) {
         IrcReply reply = null;
         String results[] = match(msg);
-        int replyId = RID_UNKNOWN;
+        int id = RID_UNKNOWN;
         try {
-            replyId = Integer.parseInt(results[0]);
-            switch (replyId) {
+            id = Integer.parseInt(results[0]);
+            switch (id) {
                 case RID_SYSMSG:
-                    reply = new IrcReply(RID_SYSMSG, "", results[2]);
+                    reply = new IrcReply(id, "", results[2]);
                     break;
                 case RID_PING:
-                    reply = new IrcReply(RID_PING, results[2], "");
+                    reply = new IrcReply(id, results[2], "");
                     break;
                 case RID_JOIN:
-                    reply = new IrcReply(RID_JOIN, results[2], "");
+                    reply = new IrcReply(id, results[2], results[3]);
                     break;
                 case RID_PRIVMSG:
-                    reply = new IrcReply(RID_PRIVMSG, results[3], results[4], results[2]);
+                    reply = new IrcReply(id, results[3], results[4], results[2]);
                     break;
                 case RID_NAMES:
-                    reply = new IrcReply(RID_NAMES, results[2], results[3]);
+                    reply = new IrcReply(id, results[2], results[3]);
                     break;
                 case RID_MOTD:
-                    reply = new IrcReply(RID_MOTD, "", results[2]);
+                    reply = new IrcReply(id, "", results[2]);
                     break;
                 case RID_END_MOTD:
                     break;
@@ -78,7 +81,7 @@ public class IrcReplyParser {
     /**
      * 実際に正規表現チェックを行うメソッド matchしたグループを配列で返す
      * @param String pattern
-     * @return String[]
+     * @return String[] 0 = replyId, 1~ matches
      */
     public static String[] match(String msg) {
         int replyId = 0;

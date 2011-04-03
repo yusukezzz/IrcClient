@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -53,9 +54,7 @@ public class IrcConnectionService extends Service {
      */
     public boolean removeHost(String setting) {
         IrcConnection conn = getConnection(setting);
-        if (conn == null) {
-            return false;
-        }
+        if (conn == null) { return false; }
         conn.close();
         conns.remove(setting);
         return true;
@@ -84,7 +83,6 @@ public class IrcConnectionService extends Service {
     @SuppressWarnings("rawtypes")
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (conns != null) {
             // 接続しているhostがあったら切断
             Iterator<?> ite = conns.entrySet().iterator();
@@ -97,6 +95,7 @@ public class IrcConnectionService extends Service {
             }
             conns = null;
         }
+        super.onDestroy();
         Toast.makeText(this, "IrcConnection has been terminated.", Toast.LENGTH_SHORT).show();
     }
 
@@ -125,7 +124,8 @@ public class IrcConnectionService extends Service {
                 this.updateMsg("", host.getHostName() + " connecting...");
                 socket = new Socket(host.getHostName(), Integer.parseInt(host.getPort()));
                 bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                br = new BufferedReader(new InputStreamReader(socket.getInputStream(), host.getCharset()));
+                br = new BufferedReader(new InputStreamReader(socket.getInputStream(),
+                    host.getCharset()));
             } catch (UnsupportedEncodingException e) {
                 Util.d(e.getStackTrace());
             } catch (UnknownHostException e) {
@@ -135,7 +135,7 @@ public class IrcConnectionService extends Service {
             }
             running = true;
             this.start();
-            if (host.getPassword() != "") {
+            if (host.getPassword().equals("") == false) {
                 this.pass(host.getPassword());
             }
             this.changeNick(host.getNick());
@@ -189,11 +189,11 @@ public class IrcConnectionService extends Service {
                 while ((current = br.readLine()) != null && running) {
                     // IRCサーバからの応答を識別する
                     IrcReply reply = IrcReplyParser.parse(current);
-                    int reply_id = reply.getId();
+                    int replyId = reply.getId();
                     String body = reply.getBody();
                     String channel = reply.getChannel();
                     String from = reply.getFrom();
-                    switch (reply_id) {
+                    switch (replyId) {
                         case IrcReplyParser.RID_PING:
                             this.pong(channel);
                             break;
@@ -221,6 +221,8 @@ public class IrcConnectionService extends Service {
             } catch (UnknownHostException e) {
                 Util.d(e.getStackTrace());
             } catch (IOException e) {
+                Util.d(e.getStackTrace());
+            } catch (NullPointerException e) {
                 Util.d(e.getStackTrace());
             } finally {
                 // 切断
@@ -278,7 +280,8 @@ public class IrcConnectionService extends Service {
             } catch (UnknownHostException e) {
                 Util.d(e.getStackTrace());
             }
-            this.write("USER " + host.getLogin() + " " + hostname + " " + host.getHostName() + " :" + host.getReal());
+            this.write("USER " + host.getLogin() + " " + hostname + " " + host.getHostName() + " :"
+                + host.getReal());
         }
 
         /**
@@ -373,9 +376,19 @@ public class IrcConnectionService extends Service {
             }
         }
 
+        /**
+         * ユーザー一覧を更新する
+         * @param ch_name
+         * @param users
+         */
         private void updateUsers(String ch_name, String users) {
             IrcChannel ch = getChannel(ch_name);
-            ch.updateUsers(users);
+            if (ch == null) {
+                ch = this.join(ch_name);
+            }
+            if (ch != null) {
+                ch.updateUsers(users);
+            }
         }
 
         /**
@@ -392,6 +405,25 @@ public class IrcConnectionService extends Service {
          */
         public String getRecieve() {
             return receive;
+        }
+
+        /**
+         * joinしているchannelリストを返す
+         * @return ArrayList<IrcChannel>
+         */
+        @SuppressWarnings("rawtypes")
+        public ArrayList<IrcChannel> getChannels() {
+            ArrayList<IrcChannel> latestChannels = new ArrayList<IrcChannel>();
+            if (channels.isEmpty()) {
+                return latestChannels;
+            }
+            Iterator<?> ite = channels.entrySet().iterator();
+            while (ite.hasNext()) {
+                Map.Entry obj = (Map.Entry) ite.next();
+                IrcChannel ch = (IrcChannel) obj.getValue();
+                latestChannels.add(ch);
+            }
+            return latestChannels;
         }
     }
 }
