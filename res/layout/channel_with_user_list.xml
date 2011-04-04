@@ -4,7 +4,8 @@
     <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:id="@+id/left_layout" android:layout_weight="0.3">
         <include android:id="@+id/left" layout="@layout/channel"/>
     </LinearLayout>
-    <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:id="@+id/right_layout" android:layout_weight="1">
-        <include android:id="@+id/right" layout="@layout/user_list"/>
+    <LinearLayout android:layout_width="fill_parent" android:id="@+id/right_layout" android:layout_weight="1" android:orientation="vertical" android:layout_height="fill_parent">
+        <include android:id="@+id/right1" layout="@layout/user_list"/>
+        <include android:id="@+id/right2" layout="@layout/channel_list"/>
     </LinearLayout>
 </LinearLayout>

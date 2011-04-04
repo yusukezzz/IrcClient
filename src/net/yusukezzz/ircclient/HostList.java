@@ -51,7 +51,7 @@ public class HostList extends ListActivity {
     public static final String HOSTS_FILE = "hosts.json";
     private JSONArray json;
     private static MyJson myjson = null;
-    private HostAdapter adapter;
+    private static HostAdapter adapter;
     private boolean mIsBind = false;
 
     private static IrcConnectionService localService = null;
@@ -267,10 +267,7 @@ public class HostList extends ListActivity {
      * HostListを更新する
      */
     private void updateList() {
-        // adapter.notifyDataSetChanged();
-        // アダプターにセット
-        adapter = new HostAdapter(this, R.layout.host_list_row, hosts);
-        setListAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -303,6 +300,7 @@ public class HostList extends ListActivity {
     public static void addHost(IrcHost host) {
         if (host != null) {
             hosts.add(host);
+            adapter.notifyDataSetChanged();
             updateJson();
         }
     }

@@ -30,22 +30,22 @@ public class IrcClient extends Activity {
     private final int UPDATE_INTERVAL = 1000;
     private Handler handler = new Handler();
 
-    // channel view
+    // view parts
     private TextView title;
     private TextView recieve;
     private static EditText sendtxt;
     private Button postbtn;
     private Button togglebtn;
     private ListView user_list;
-    private UserListAdapter adapter;
-
-    private ArrayList<User> users = new ArrayList<User>();
+    private ListView channel_list;
+    private UserListAdapter userAdapter;
+    private ChannelListAdapter chAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); 
+        this.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.channel_with_user_list);
         // channelの部品準備
         title = (TextView) findViewById(R.id.title);
@@ -54,9 +54,13 @@ public class IrcClient extends Activity {
         togglebtn = (Button) this.findViewById(R.id.toggle_list_btn);
         sendtxt = (EditText) this.findViewById(R.id.send_test);
         // リストの準備
-        adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, users);
+        channel_list = (ListView) this.findViewById(R.id.channel_list);
         user_list = (ListView) this.findViewById(R.id.user_list);
-        user_list.setAdapter(adapter);
+//        userAdapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, users);
+//        user_list.setAdapter(userAdapter);
+//        chAdapter = new ChannelListAdapter(getApplicationContext(), R.layout.channel_list_row,
+//            channels);
+//        channel_list.setAdapter(chAdapter);
         // 縦画面だったら右側のリストを隠す
         LinearLayout r = (LinearLayout) findViewById(R.id.right_layout);
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -83,17 +87,18 @@ public class IrcClient extends Activity {
                 }
             }
         });
-        
 
         // 定期的に受信テキストの表示を更新
         Runnable looper = new Runnable() {
             public void run() {
                 if (HostList.currentHost != null) {
-                    String str = HostList.currentCh == null ? HostList.currentHost.connection().getRecieve()
+                    String str = HostList.currentCh == null ? HostList.currentHost.connection()
+                        .getRecieve()
                             : HostList.currentCh.getRecieve();
                     recieve.setText(str);
                     updateTitle();
                     updateUserList();
+                    updateChannelList();
                     // UPDATE_INTERVAL ms後に再描画
                     handler.postDelayed(this, UPDATE_INTERVAL);
                 }
@@ -202,9 +207,16 @@ public class IrcClient extends Activity {
      */
     public void updateUserList() {
         if (HostList.currentHost != null && HostList.currentCh != null) {
-            adapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row,
-                    HostList.currentCh.getUsers());
-            user_list.setAdapter(adapter);
+            userAdapter = new UserListAdapter(getApplicationContext(), R.layout.user_list_row, HostList.currentCh.getUsers());
+            user_list.setAdapter(userAdapter);
+        }
+    }
+
+    public void updateChannelList() {
+        if (HostList.currentHost != null) {
+            chAdapter = new ChannelListAdapter(getApplicationContext(), R.layout.channel_list_row,
+                HostList.currentHost.connection().getChannels());
+            channel_list.setAdapter(chAdapter);
         }
     }
 
@@ -213,9 +225,7 @@ public class IrcClient extends Activity {
      * @param text
      */
     private void postText(String text) {
-        if (text.equals("") || text.equals(null)) {
-            return;
-        }
+        if (text.equals("") || text.equals(null)) { return; }
         if (HostList.currentHost != null && HostList.currentCh != null) {
             HostList.currentHost.connection().privmsg(HostList.currentCh.getName(), text);
             sendtxt.setText("");
