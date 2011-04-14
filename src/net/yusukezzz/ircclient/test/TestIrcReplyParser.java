@@ -58,7 +58,7 @@ public class TestIrcReplyParser extends TestCase {
     /**
      * New universal pattern
      */
-    private final static String REPLY_REGEXP = "^(:([\\w!@~\\.]+?)\\x20)?(\\w+|\\d{3})((\\x20([^\\x00\\x20\\n:]+))*)?(\\x20:([^\\x00\\n]+))?";
+    private final static String MES_REGEXP = "^(:([\\w!@~\\.]+?)\\x20)?(\\w+|\\d{3})((\\x20([^\\x00\\x20\\n:]+))*)?(\\x20:([^\\x00\\n]+))?";
     private final static String CHANNEL = "#yusukezzz";
     private final static String NAMES = "androzzz @yusukezzz";
     private final static String PREFIX = "yusukezzz!~yusukezzz@yusukezzz.net";
@@ -139,7 +139,7 @@ public class TestIrcReplyParser extends TestCase {
     }
 
     private Matcher getMatcher(String input) {
-        return Pattern.compile(REPLY_REGEXP).matcher(input);
+        return Pattern.compile(MES_REGEXP).matcher(input);
     }
 
 }
