@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -100,7 +101,7 @@ public class IrcConnectionService extends Service {
     }
 
     class IrcConnection extends Thread {
-        private IrcHost host;
+        private final IrcHost host;
         // ch指定のないテキストを格納
         private String receive = "";
         // 最後に表示されていたchannel
@@ -110,7 +111,8 @@ public class IrcConnectionService extends Service {
         private Socket socket = null;
         private BufferedWriter bw;
         private BufferedReader br;
-        private HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
+        private final HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
+        private final ArrayList<IrcEventListener> listeners = new ArrayList<IrcEventListener>();
 
         public IrcConnection(IrcHost host) {
             this.host = host;
@@ -146,7 +148,16 @@ public class IrcConnectionService extends Service {
          * socket等を閉じる
          */
         private void disconnect() {
+        }
+
+        /**
+         * ホストから切断する
+         */
+        public synchronized void close() {
             try {
+                if (isInterrupted() == false) {
+                    interrupt();
+                }
                 // 入出力ストリーム切断
                 if (br != null) {
                     br.close();
@@ -158,25 +169,16 @@ public class IrcConnectionService extends Service {
                 if (socket != null) {
                     socket.close();
                 }
-            } catch (IOException e) {
-                Util.d(e.getStackTrace());
-            }
-        }
-
-        /**
-         * ホストから切断する
-         */
-        public void close() {
-            // Ircサーバーに quit 送信
-            this.quit();
-            // thread 停止
-            running = false;
-            try {
                 // thread 停止待ち
                 this.join();
             } catch (InterruptedException e) {
                 Util.d(e.getStackTrace());
+            } catch (IOException e) {
+                Util.d(e.getStackTrace());
             }
+            br = null;
+            bw = null;
+            socket = null;
         }
 
         /**
@@ -186,47 +188,16 @@ public class IrcConnectionService extends Service {
         public void run() {
             try {
                 String current = null;
-                while ((current = br.readLine()) != null && running) {
-                    // IRCサーバからの応答を識別する
-                    IrcReply reply = IrcReplyParser.parse(current);
-                    int replyId = reply.getId();
-                    String body = reply.getBody();
-                    String channel = reply.getChannel();
-                    String from = reply.getFrom();
-                    switch (replyId) {
-                        case IrcReplyParser.RID_PING:
-                            this.pong(channel);
-                            break;
-                        case IrcReplyParser.RID_SYSMSG:
-                            this.updateMsg("", " * " + body);
-                            break;
-                        case IrcReplyParser.RID_MOTD:
-                            this.updateMsg("", body);
-                            break;
-                        case IrcReplyParser.RID_JOIN:
-                            this.updateMsg(channel, " * join " + channel);
-                            break;
-                        case IrcReplyParser.RID_PRIVMSG:
-                            this.updateMsg(channel, "<" + from + "> " + body);
-                            break;
-                        case IrcReplyParser.RID_NAMES:
-                            this.updateMsg(channel, " * names " + body);
-                            this.updateUsers(channel, body);
-                            break;
-                        default:
-                            this.updateMsg("", current);
-                            break;
+                while (isInterrupted() == false) {
+                    current = br.readLine();
+                    if (current != null) {
+                        dispatch(current);
+                    } else {
+                        disconnect();
                     }
                 }
-            } catch (UnknownHostException e) {
-                Util.d(e.getStackTrace());
             } catch (IOException e) {
                 Util.d(e.getStackTrace());
-            } catch (NullPointerException e) {
-                Util.d(e.getStackTrace());
-            } finally {
-                // 切断
-                this.disconnect();
             }
         }
 
@@ -239,6 +210,35 @@ public class IrcConnectionService extends Service {
                 return false;
             } else {
                 return socket.isConnected();
+            }
+        }
+        
+        /**
+         * IRCサーバーからのレスポンスをIRCイベントに変換する
+         * @param msg
+         */
+        private void dispatch(String msg) {
+            IrcMessage m = IrcMessage.parse(msg);
+            if (m == null) {
+                return;
+            }
+            String command = m.getCommand();
+            if (command.equalsIgnoreCase("PRIVMSG")) {
+                IrcUser user = m.getUser();
+                for (IrcEventListener l : listeners) {
+                    l.onPrivmsg();
+                }
+            } else if (command.equalsIgnoreCase("PING")) {
+                String ping = m.getTrailing();
+                for (IrcEventListener l : listeners) {
+                    l.onPing();
+                }
+                if (running == false) {
+                    running = true;
+                    for (IrcEventListener l : listeners) {
+                        l.onRegistered();
+                    }
+                }
             }
         }
 
@@ -331,6 +331,7 @@ public class IrcConnectionService extends Service {
 
         public void quit() {
             this.write("QUIT :Leaving...");
+            this.close();
         }
 
         /**

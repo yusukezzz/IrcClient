@@ -11,11 +11,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class UserListAdapter extends ArrayAdapter<User> {
-    private List<User> users;
-    private LayoutInflater inflater;
+public class UserListAdapter extends ArrayAdapter<IrcUser> {
+    private final List<IrcUser> users;
+    private final LayoutInflater inflater;
 
-    public UserListAdapter(Context context, int resource, List<User> items) {
+    public UserListAdapter(Context context, int resource, List<IrcUser> items) {
         super(context, resource, items);
         users = items;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -28,16 +28,16 @@ public class UserListAdapter extends ArrayAdapter<User> {
             // 1行分のviewを生成
             view = inflater.inflate(R.layout.user_list_row, null);
         }
-        final User user = users.get(position);
+        final IrcUser user = users.get(position);
         TextView textView = (TextView) view.findViewById(R.id.user_list_row_name);
-        textView.setText(user.getName());
+        textView.setText(user.getNick());
         textView.setClickable(true);
         textView.setFocusable(true);
         textView.setFocusableInTouchMode(true);
         textView.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    IrcClient.setReplyName(user.getName());
+                    IrcClient.setReplyName(user.getNick());
                 }
                 return true;
             }

@@ -3,7 +3,7 @@ package net.yusukezzz.ircclient;
 import java.util.ArrayList;
 
 public class IrcChannel {
-    private ArrayList<User> users = new ArrayList<User>();
+    private final ArrayList<IrcUser> users = new ArrayList<IrcUser>();
     private String ch_name;
     private String recieve = "";
 
@@ -17,15 +17,6 @@ public class IrcChannel {
      * @return bool
      */
     public void updateUsers(String names) {
-        // userリストを初期化
-        users.clear();
-        String nameA[] = names.split(" ");
-        for (String name : nameA) {
-            // なるとチェック
-            boolean naruto = name.indexOf("@") == 1 ? true : false;
-            User user = new User(name, naruto);
-            users.add(user);
-        }
     }
 
     /**
@@ -40,7 +31,7 @@ public class IrcChannel {
      * users を返す
      * @return users
      */
-    public ArrayList<User> getUsers() {
+    public ArrayList<IrcUser> getUsers() {
         return users;
     }
 
@@ -51,7 +42,7 @@ public class IrcChannel {
     public ArrayList<String> getUserNames() {
         ArrayList<String> names = new ArrayList<String>();
         for (int i = 0; i < users.size(); i++) {
-            names.add(users.get(i).getName());
+            names.add(users.get(i).getNick());
         }
         return names;
     }
