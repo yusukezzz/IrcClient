@@ -135,6 +135,8 @@ public class IrcConnectionService extends Service {
             } catch (IOException e) {
                 Util.d(e.getStackTrace());
             }
+            IrcEventAdapter adapter = new IrcEventAdapter();
+            listeners.add(adapter);
             running = true;
             this.start();
             if (host.getPassword().equals("") == false) {
@@ -148,6 +150,7 @@ public class IrcConnectionService extends Service {
          * socket等を閉じる
          */
         private void disconnect() {
+            close();
         }
 
         /**
@@ -226,13 +229,11 @@ public class IrcConnectionService extends Service {
             if (command.equalsIgnoreCase("PRIVMSG")) {
                 IrcUser user = m.getUser();
                 for (IrcEventListener l : listeners) {
-                    l.onPrivmsg();
+                    l.onPrivmsg(user, m.getMiddle(), m.getMiddle());
                 }
             } else if (command.equalsIgnoreCase("PING")) {
                 String ping = m.getTrailing();
-                for (IrcEventListener l : listeners) {
-                    l.onPing();
-                }
+                // TODO: do pong
                 if (running == false) {
                     running = true;
                     for (IrcEventListener l : listeners) {

@@ -16,9 +16,8 @@ public interface IrcEventListener extends EventListener {
     public void onList();
     public void onInvite();
     public void onKick();
-    public void onPrivmsg();
+    public void onPrivmsg(IrcUser user, String to, String msg);
     public void onNotice();
-    public void onPing();
     public void onReply();
     public void onUnknown();
 }
