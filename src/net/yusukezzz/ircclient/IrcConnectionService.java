@@ -112,7 +112,6 @@ public class IrcConnectionService extends Service {
         private BufferedWriter bw;
         private BufferedReader br;
         private final HashMap<String, IrcChannel> channels = new HashMap<String, IrcChannel>();
-        private final ArrayList<IrcEventListener> listeners = new ArrayList<IrcEventListener>();
 
         public IrcConnection(IrcHost host) {
             this.host = host;
@@ -123,20 +122,21 @@ public class IrcConnectionService extends Service {
          */
         public void connect() {
             try {
-                this.updateMsg("", host.getHostName() + " connecting...");
+                this.addMsg("", host.getHostName() + " connecting...");
                 socket = new Socket(host.getHostName(), Integer.parseInt(host.getPort()));
                 bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 br = new BufferedReader(new InputStreamReader(socket.getInputStream(),
                     host.getCharset()));
             } catch (UnsupportedEncodingException e) {
                 Util.d(e.getStackTrace());
+                close();
             } catch (UnknownHostException e) {
                 Util.d(e.getStackTrace());
+                close();
             } catch (IOException e) {
                 Util.d(e.getStackTrace());
+                close();
             }
-            IrcEventAdapter adapter = new IrcEventAdapter();
-            listeners.add(adapter);
             running = true;
             this.start();
             if (host.getPassword().equals("") == false) {
@@ -191,16 +191,17 @@ public class IrcConnectionService extends Service {
         public void run() {
             try {
                 String current = null;
-                while (isInterrupted() == false) {
+                while (!isInterrupted()) {
                     current = br.readLine();
                     if (current != null) {
                         dispatch(current);
                     } else {
-                        disconnect();
+                        close();
                     }
                 }
             } catch (IOException e) {
                 Util.d(e.getStackTrace());
+                close();
             }
         }
 
@@ -221,24 +222,25 @@ public class IrcConnectionService extends Service {
          * @param msg
          */
         private void dispatch(String msg) {
+            Util.d(msg);
             IrcMessage m = IrcMessage.parse(msg);
+//            Util.d("command:" + m.getCommand());
+//            Util.d("middle:" + m.getMiddle());
+//            Util.d("nick:" + m.getNick());
+//            Util.d("trail:" + m.getTrailing());
             if (m == null) {
                 return;
             }
             String command = m.getCommand();
             if (command.equalsIgnoreCase("PRIVMSG")) {
                 IrcUser user = m.getUser();
-                for (IrcEventListener l : listeners) {
-                    l.onPrivmsg(user, m.getMiddle(), m.getMiddle());
-                }
+                String html = "<div class='privmsg'>" + Util.getTime() + " (" + user.getNick() + ") " + m.getTrailing() + "</div>";
+                addMsg(m.getMiddle(), html);
             } else if (command.equalsIgnoreCase("PING")) {
                 String ping = m.getTrailing();
-                // TODO: do pong
+                pong(ping);
                 if (running == false) {
                     running = true;
-                    for (IrcEventListener l : listeners) {
-                        l.onRegistered();
-                    }
                 }
             }
         }
@@ -342,7 +344,7 @@ public class IrcConnectionService extends Service {
          */
         public void privmsg(String ch, String str) {
             this.write("PRIVMSG " + ch + " :" + str);
-            this.updateMsg(ch, "<" + host.getNick() + "> " + str);
+            this.addMsg(ch, "<" + host.getNick() + "> " + str);
         }
 
         /**
@@ -363,7 +365,7 @@ public class IrcConnectionService extends Service {
          * @param ch
          * @param text
          */
-        private void updateMsg(String ch, String text) {
+        private void addMsg(String ch, String text) {
             String line = Util.getTime() + " " + text + "\n";
             IrcChannel channel = null;
             try {

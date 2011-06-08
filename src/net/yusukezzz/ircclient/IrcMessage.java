@@ -29,7 +29,7 @@ public class IrcMessage {
             try {
                 reply = new IrcMessage(matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(8));
             } catch (IllegalStateException e) {
-                reply = null;
+                reply = new IrcMessage("", "", "", "");
             }
         }
         return reply;
@@ -44,7 +44,7 @@ public class IrcMessage {
     }
     
     public String getMiddle() {
-        return middle;
+        return middle.trim();
     }
     
     public String getTrailing() {
